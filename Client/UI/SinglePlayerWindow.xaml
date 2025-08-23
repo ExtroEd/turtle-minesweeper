@@ -1,0 +1,88 @@
+<local:BaseWindow x:Class="Client.UI.SinglePlayerWindow"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:local="clr-namespace:Client.UI"
+                  Title="Turtle Minesweeper"
+                  WindowState="Maximized"
+                  WindowStyle="None">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/UI/ButtonStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="50">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock x:Name="TitleText"
+                   Text="Turtle Minesweeper"
+                   FontSize="48"
+                   FontWeight="Bold"
+                   Foreground="Blue"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Top"
+                   Margin="0,40,0,0"/>
+
+        <!-- Pulsating splash text -->
+        <TextBlock x:Name="SplashText"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   Foreground="Yellow"
+                   RenderTransformOrigin="0.5,0.5"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top">
+            <TextBlock.Effect>
+                <DropShadowEffect Color="Black" ShadowDepth="0" BlurRadius="4"/>
+            </TextBlock.Effect>
+        </TextBlock>
+
+        <!-- Settings panel -->
+        <StackPanel Grid.Row="1"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Center"
+                    Width="300"
+                    Margin="0,40,0,0">
+
+            <!-- Grid size -->
+            <TextBlock Text="Grid Size (10–500)" FontWeight="Bold"/>
+            <TextBox x:Name="GridSizeTextBox" Text="20" Margin="0,5,0,10"/>
+
+            <!-- Mine % -->
+            <TextBlock Text="Mine % (0–60)" FontWeight="Bold"/>
+            <TextBox x:Name="MinePercentTextBox" Text="10" Margin="0,5,0,10"/>
+
+            <!-- Enable enemy fox -->
+            <CheckBox x:Name="EnableFoxCheckBox"
+                      Content="Enable enemy fox"
+                      Margin="0,10,0,5"
+                      Checked="EnableFoxCheckBox_Checked"
+                      Unchecked="EnableFoxCheckBox_Unchecked"/>
+
+            <!-- Fox speed (only visible if checkbox checked) -->
+            <StackPanel x:Name="FoxSpeedPanel" Visibility="Collapsed">
+                <TextBlock Text="Fox Speed (1–10 squares/sec)" FontWeight="Bold"/>
+                <TextBox x:Name="FoxSpeedTextBox" Text="5" Margin="0,5,0,10"/>
+            </StackPanel>
+
+            <!-- Start game button -->
+            <Button Content="Start Game" 
+                    Style="{StaticResource MainButtonStyle}" 
+                    Click="StartGame_Click"/>
+            
+            <Button Content="Back" 
+                    Style="{StaticResource MainButtonStyle}" 
+                    Click="Back_Click"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,40"/>
+        </StackPanel>
+    </Grid>
+</local:BaseWindow>

@@ -1,5 +1,68 @@
+# Rider / JetBrains
+.idea/
+*.sln.iml
+*.ipr
+*.iws
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.DotSettings.user
+
+# Build results
 bin/
 obj/
-/packages/
-riderModule.iml
-/_ReSharper.Caches/
+out/
+Debug/
+Release/
+
+# Rider caches
+.idea/.idea.TMS/.idea/
+*.rider/
+
+# OS generated
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# NuGet packages
+*.nupkg
+packages/
+
+# Rider workspace settings
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/.name
+
+# ReSharper
+_ReSharper*/
+
+# Visual Studio Code
+.vscode/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# JetBrains Rider backups
+*.bak
+
+# Others
+*.pdb
+*.cache
+*.ilk
+*.obj
+*.iobj
+*.idb
+*.class
+*.dll
+*.exe
+*.lib
+*.vspscc
+*.vssscc
