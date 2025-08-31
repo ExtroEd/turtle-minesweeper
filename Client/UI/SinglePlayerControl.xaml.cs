@@ -1,15 +1,12 @@
 ﻿using System.Windows;
 
-
 namespace Client.UI;
 
-public partial class SinglePlayerWindow
+public partial class SinglePlayerControl
 {
-    public SinglePlayerWindow()
+    public SinglePlayerControl()
     {
         InitializeComponent();
-
-        InitSplash(TitleText, SplashText);
     }
 
     private void EnableFoxCheckBox_Checked(object sender, RoutedEventArgs e) 
@@ -50,8 +47,9 @@ public partial class SinglePlayerWindow
 
     private void Back_Click(object sender, RoutedEventArgs e)
     {
-        var mainWindow = new MainWindow();
-        mainWindow.Show();
-        Close();
+        if (Application.Current.MainWindow is MainWindow main)
+        {
+            main.SwitchContent(new MainMenuControl());
+        }
     }
 }

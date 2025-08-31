@@ -3,30 +3,13 @@
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:local="clr-namespace:Client.UI"
                   Title="Turtle Minesweeper">
-
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/UI/ButtonStyles.xaml"/>
-                <ResourceDictionary Source="/UI/MainStyles.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
-
+    
     <Grid>
-        <!-- Используем унаследованные поля -->
+        <!-- Title and splash -->
         <TextBlock Style="{StaticResource TitleTextStyle}" x:Name="TitleText"/>
         <TextBlock Style="{StaticResource SplashTextStyle}" x:Name="SplashText"/>
 
-        <!-- Кнопки по центру -->
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="200">
-            <Button Content="Single Player" Click="SinglePlayer_Click" Style="{StaticResource MainButtonStyle}"/>
-            <Button Content="Multi Player"  Click="MultiPlayer_Click"  Style="{StaticResource MainButtonStyle}"/>
-            <Button Content="Options"       Click="Options_Click"      Style="{StaticResource MainButtonStyle}"/>
-            <Button Content="Exit"          Click="Exit_Click"         Style="{StaticResource RedButtonStyle}"/>
-        </StackPanel>
-        
-        <!-- Version text -->
-        <TextBlock Style="{StaticResource VersionTextStyle}"/>
+        <!-- Containers for content -->
+        <Grid x:Name="MainContainer" Margin="0,80,0,0"/>
     </Grid>
 </local:BaseWindow>

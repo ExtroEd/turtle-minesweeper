@@ -1,4 +1,4 @@
-using System.Windows;
+using System.Windows.Controls;
 
 namespace Client.UI;
 
@@ -10,29 +10,12 @@ public partial class MainWindow
 
         // Bind splash text and title to BaseWindow
         InitSplash(TitleText, SplashText);
+        SwitchContent(new MainMenuControl());
     }
 
-    private void SinglePlayer_Click(object sender, RoutedEventArgs e)
+    public void SwitchContent(UserControl screen)
     {
-        var window = new SinglePlayerWindow();
-        window.Show();
-        Close();
-    }
-
-    private void MultiPlayer_Click(object sender, RoutedEventArgs e)
-    {
-        MessageBox.Show("🌍 Multi Player is in develop");
-    }
-
-    private void Options_Click(object sender, RoutedEventArgs e)
-    {
-        var window = new OptionsWindow();
-        window.Show();
-        Close();
-    }
-
-    private void Exit_Click(object sender, RoutedEventArgs e)
-    {
-        Close();
+        MainContainer.Children.Clear();
+        MainContainer.Children.Add(screen);
     }
 }
