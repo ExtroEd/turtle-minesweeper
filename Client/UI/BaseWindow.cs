@@ -14,26 +14,41 @@ namespace Client.UI
         private double _scale = 1.0;
         private double _time;
 
-        protected TextBlock? TitleText;
-        protected TextBlock? SplashText;
+        private TextBlock? _titleText;
+        private TextBlock? _splashText;
 
         public BaseWindow()
         {
-            Background = Brushes.White; // общий фон
+            Background = Brushes.White; // main background
             _timer.Tick += Timer_Tick;
             _timer.Start();
+            
+            WindowState = AppState.LastWindowState;
+            WindowStyle = AppState.LastWindowStyle;
         }
 
-        // инициализация сплэш-текста в наследниках
+        public static class AppState
+        {
+            public static string? CurrentSplashText;
+            public static WindowState LastWindowState = WindowState.Maximized;
+            public static WindowStyle LastWindowStyle = WindowStyle.None;
+        }
+        
+        // initializing splash-text in heir
         protected void InitSplash(TextBlock title, TextBlock splash)
         {
-            TitleText = title;
-            SplashText = splash;
+            _titleText = title;
+            _splashText = splash;
 
-            var rnd = new Random();
-            SplashText.Text = SplashTexts.All[rnd.Next(SplashTexts.All.Length)];
+            if (string.IsNullOrEmpty(AppState.CurrentSplashText))
+            {
+                var rnd = new Random();
+                AppState.CurrentSplashText = SplashTexts.All[rnd.Next(SplashTexts.All.Length)];
+            }
 
-            TitleText.SizeChanged += (_, _) => UpdateSplashPosition();
+            _splashText.Text = AppState.CurrentSplashText;
+
+            _titleText.SizeChanged += (_, _) => UpdateSplashPosition();
             SizeChanged += (_, _) => UpdateSplashPosition();
 
             UpdateSplashPosition();
@@ -43,29 +58,10 @@ namespace Client.UI
         {
             base.OnPreviewKeyDown(e);
 
-            if (e.Key == Key.F11)
-            {
-                ToggleFullscreen();
-                e.Handled = true;
-            }
-            else if (e.Key == Key.Escape && this is not MainWindow)
+            if (e.Key == Key.Escape && this is not MainWindow)
             {
                 GoToMainMenu();
                 e.Handled = true;
-            }
-        }
-
-        private void ToggleFullscreen()
-        {
-            if (WindowState == WindowState.Normal)
-            {
-                WindowState = WindowState.Maximized;
-                WindowStyle = WindowStyle.None;
-            }
-            else
-            {
-                WindowState = WindowState.Normal;
-                WindowStyle = WindowStyle.SingleBorderWindow;
             }
         }
 
@@ -85,12 +81,12 @@ namespace Client.UI
 
         private void UpdateSplashPosition()
         {
-            if (TitleText == null || SplashText == null) return;
+            if (_titleText == null || _splashText == null) return;
 
-            var titleCenter = TitleText.TranslatePoint(
-                new Point(TitleText.ActualWidth / 2, TitleText.ActualHeight / 2), this);
+            var titleCenter = _titleText.TranslatePoint(
+                new Point(_titleText.ActualWidth / 2, _titleText.ActualHeight / 2), this);
 
-            SplashText.RenderTransform = new TransformGroup
+            _splashText.RenderTransform = new TransformGroup
             {
                 Children =
                 {
@@ -99,8 +95,8 @@ namespace Client.UI
                 }
             };
 
-            SplashText.Margin = new Thickness(titleCenter.X + 150, titleCenter.Y + 50, 0, 0);
-            SplashText.Effect = new DropShadowEffect { Color = Colors.Black, ShadowDepth = 0, BlurRadius = 4, Opacity = 1.0 };
+            _splashText.Margin = new Thickness(titleCenter.X + 150, titleCenter.Y + 50, 0, 0);
+            _splashText.Effect = new DropShadowEffect { Color = Colors.Black, ShadowDepth = 0, BlurRadius = 4, Opacity = 1.0 };
         }
     }
 }
