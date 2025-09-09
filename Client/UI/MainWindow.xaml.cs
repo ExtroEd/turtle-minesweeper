@@ -1,4 +1,7 @@
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows;
+
 
 namespace Client.UI;
 
@@ -8,7 +11,6 @@ public partial class MainWindow
     {
         InitializeComponent();
 
-        // Bind splash text and title to BaseWindow
         InitSplash(TitleText, SplashText);
         SwitchContent(new MainMenuControl());
     }
@@ -17,5 +19,11 @@ public partial class MainWindow
     {
         MainContainer.Children.Clear();
         MainContainer.Children.Add(screen);
+        
+        bool isGame = screen is GameControl;
+        TitleText.Visibility = isGame ? Visibility.Collapsed : Visibility.Visible;
+        SplashText.Visibility = isGame ? Visibility.Collapsed : Visibility.Visible;
+
+        Background = isGame ? Brushes.LightGray : Brushes.White;
     }
 }

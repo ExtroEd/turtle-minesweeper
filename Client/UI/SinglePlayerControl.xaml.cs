@@ -1,6 +1,4 @@
 ﻿using System.Windows;
-using Client.Logic;
-using Client.UI;
 
 
 namespace Client.UI;
