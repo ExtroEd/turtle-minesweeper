@@ -1,4 +1,7 @@
 ﻿using System.Windows;
+using Client.Logic;
+using Client.UI;
+
 
 namespace Client.UI;
 
@@ -28,7 +31,7 @@ public partial class SinglePlayerControl
             MessageBox.Show("Mine % must be a number between 0 and 60.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-
+        
         int foxSpeed = 0;
         if (EnableFoxCheckBox.IsChecked == true)
         {
@@ -38,11 +41,11 @@ public partial class SinglePlayerControl
                 return;
             }
         }
-
-        MessageBox.Show($"Starting single player game...\n" +
-                        $"Grid: {gridSize}\n" +
-                        $"Mine %: {minePercent}\n" +
-                        $"Fox: {(EnableFoxCheckBox.IsChecked == true ? foxSpeed.ToString() : "disabled")}");
+        
+        if (Application.Current.MainWindow is MainWindow main)
+        {
+            main.SwitchContent(new GameControl(gridSize, minePercent));
+        }
     }
 
     private void Back_Click(object sender, RoutedEventArgs e)
