@@ -14,6 +14,7 @@ public partial class GameControl
         var field = new Field(gridSize);
         new FieldGenerator(field, new Random()).Generate(minePercent);
 
-        _fieldRenderer = new FieldRenderer(GameCanvas, field);
+        var turtle = new Turtle();
+        _fieldRenderer = new FieldRenderer(GameCanvas, field, turtle);
     }
 }

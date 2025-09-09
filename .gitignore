@@ -45,6 +45,7 @@ _ReSharper*/
 
 # Logs
 *.log
+Logs/
 
 # Temporary files
 *.tmp
