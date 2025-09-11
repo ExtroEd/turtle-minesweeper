@@ -10,13 +10,15 @@ public class FieldGenerator
 
     public FieldGenerator(Field field, Random random)
     {
-        this._field = field;
-        this._random = random;
+        _field = field;
+        _random = random;
     }
 
     public void Generate(int minePercentage)
     {
         _field.Clear();
+        Logger.LogFieldCleared();
+
         PlaceFlagRandom();
 
         int size = _field.Size;
@@ -35,30 +37,17 @@ public class FieldGenerator
         } while (path.Count > maxPathLength && attempts < maxAttempts);
 
         if (attempts == maxAttempts)
-        {
-            Logger.LogMap("⚠️ Warning: failed to generate valid path.");
-        }
+            Logger.LogPathGenerationFailed();
 
-        HashSet<Point> pathSet = new HashSet<Point>(path);
+        HashSet<Point> pathSet = new(path);
         foreach (var p in pathSet)
-        {
             _field.MarkCell(p.X, p.Y, '.');
-        }
 
         PlaceMinesExcludingPath(minePercentage, pathSet);
-            
-        Logger.LogMap("Final field generated:");
-        for (int y = 0; y < _field.Size; y++)
-        {
-            for (int x = 0; x < _field.Size; x++)
-            {
-                if (_field.IsMine(x, y))
-                    Logger.LogMap($"Mine at ({x}, {y})");
-            }
-        }
-        Logger.LogMap($"Flag at ({_field.FlagX}, {_field.FlagY})");
-    }
 
+        Logger.LogMapFinalField(_field);
+    }
+    
     private void PlaceFlagRandom()
     {
         int size = _field.Size;
@@ -81,14 +70,15 @@ public class FieldGenerator
         {
             int x = _random.Next(size);
             int y = _random.Next(size);
-            Point candidate = new Point(x, y);
+            Point candidate = new(x, y);
 
             if ((x == 0 && y == 0) || (x == _field.FlagX && y == _field.FlagY) || pathSet.Contains(candidate))
                 continue;
 
             if (_field.IsMine(x, y)) continue;
 
-            _field.PlaceMine(x, y);
+            int mineId = placedMines + 1;
+            _field.PlaceMine(x, y, mineId);
             placedMines++;
         }
     }

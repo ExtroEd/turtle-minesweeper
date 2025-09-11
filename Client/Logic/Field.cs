@@ -1,18 +1,21 @@
 ﻿namespace Client.Logic;
 
+
 public class Field
 {
     private readonly int _size;
     private readonly char[,] _grid;
     private readonly bool[,] _hasMine;
+    private readonly Dictionary<(int x, int y), int> _mineIds;
 
     private int _flagX, _flagY;
 
     public Field(int size)
     {
-        this._size = size;
-        this._grid = new char[size, size];
-        this._hasMine = new bool[size, size];
+        _size = size;
+        _grid = new char[size, size];
+        _hasMine = new bool[size, size];
+        _mineIds = new Dictionary<(int, int), int>();
         Clear();
     }
 
@@ -26,7 +29,8 @@ public class Field
                 _hasMine[y, x] = false;
             }
         }
-        Logger.LogMap("Field cleared.");
+        _mineIds.Clear();
+        Logger.LogFieldCleared();
     }
 
     public void PlaceFlag(int x, int y)
@@ -35,15 +39,14 @@ public class Field
         _flagX = x;
         _flagY = y;
         _grid[y, x] = '$';
-        Logger.LogMap($"Flag placed at ({_flagX}, {_flagY}).");
     }
 
-    public void PlaceMine(int x, int y)
+    public void PlaceMine(int x, int y, int mineId)
     {
         if (!IsInBounds(x, y)) return;
         _grid[y, x] = '#';
         _hasMine[y, x] = true;
-        Logger.LogMap($"Mine placed at ({x}, {y}).");
+        _mineIds[(x, y)] = mineId;
     }
 
     public bool IsMine(int x, int y)
@@ -51,6 +54,9 @@ public class Field
         return IsInBounds(x, y) && _hasMine[y, x];
     }
 
+    public int? GetMineId(int x, int y) =>
+        _mineIds.TryGetValue((x, y), out var id) ? id : null;
+    
     public bool IsSafe(int x, int y)
     {
         return IsInBounds(x, y) && _grid[y, x] != '#';
