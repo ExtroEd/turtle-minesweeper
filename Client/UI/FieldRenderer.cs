@@ -14,6 +14,8 @@ public class FieldRenderer
     private readonly Field _field;
     private readonly Turtle _turtle;
     
+    private Fox? _fox;
+    private Ellipse? _foxEllipse;
     private Ellipse _turtleEllipse;
 
     private double _scale = 1.0;
@@ -104,6 +106,22 @@ public class FieldRenderer
         UpdateCells();
     }
 
+    public void SetFox(Fox fox)
+    {
+        _fox = fox;
+        if (_foxEllipse == null)
+        {
+            double cellSize = (_canvas.Width / _field.Size) * _scale;
+            _foxEllipse = new Ellipse
+            {
+                Width = cellSize * 0.8,
+                Height = cellSize * 0.8,
+                Fill = Brushes.OrangeRed
+            };
+            _canvas.Children.Add(_foxEllipse);
+        }
+    }
+
     private void UpdateCells()
     {
         double cellSize = (_canvas.Width / _field.Size) * _scale;
@@ -132,6 +150,14 @@ public class FieldRenderer
         Canvas.SetTop(_turtleEllipse, _offsetY + _turtle.Y * cellSize + cellSize * 0.1);
         _turtleEllipse.Width = cellSize * 0.8;
         _turtleEllipse.Height = cellSize * 0.8;
+        
+        if (_fox != null && _foxEllipse != null)
+        {
+            Canvas.SetLeft(_foxEllipse, _offsetX + _fox.X * cellSize + cellSize * 0.1);
+            Canvas.SetTop(_foxEllipse, _offsetY + _fox.Y * cellSize + cellSize * 0.1);
+            _foxEllipse.Width = cellSize * 0.8;
+            _foxEllipse.Height = cellSize * 0.8;
+        }
     }
     
     public void Render()

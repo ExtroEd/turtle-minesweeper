@@ -29,7 +29,7 @@ public partial class SinglePlayerControl
             MessageBox.Show("Mine % must be a number between 0 and 60.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
-        
+
         int foxSpeed = 0;
         if (EnableFoxCheckBox.IsChecked == true)
         {
@@ -39,10 +39,13 @@ public partial class SinglePlayerControl
                 return;
             }
         }
-        
+
+        // Создаём GameControl с нужными параметрами
+        var gameControl = new GameControl(gridSize, minePercent, foxSpeed);
+
         if (Application.Current.MainWindow is MainWindow main)
         {
-            main.SwitchContent(new GameControl(gridSize, minePercent));
+            main.SwitchContent(gameControl);
         }
     }
 

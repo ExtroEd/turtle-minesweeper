@@ -16,6 +16,7 @@ public class FieldGenerator
 
     public void Generate(int minePercentage)
     {
+        Logger.StartSession();
         _field.Clear();
         Logger.LogFieldCleared();
 

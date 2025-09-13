@@ -26,6 +26,7 @@ public class Turtle
         if (newX < 0 || newY < 0 || newX >= _field.Size || newY >= _field.Size)
         {
             Logger.LogTurtleOutOfBounds();
+            Logger.EndSession();
             ShowEndWindow("You fell off the map! 💀");
             return;
         }
@@ -37,6 +38,7 @@ public class Turtle
         if (_field.IsMine(X, Y))
         {
             Logger.LogTurtleOnMine();
+            Logger.EndSession();
             ShowEndWindow("You stepped on a mine! 💥");
             return;
         }
@@ -44,6 +46,7 @@ public class Turtle
         if (X == _field.FlagX && Y == _field.FlagY)
         {
             Logger.LogTurtleWon();
+            Logger.EndSession();
             ShowEndWindow("You reached the flag! 🏁");
         }
     }

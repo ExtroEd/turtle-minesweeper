@@ -56,11 +56,6 @@ public class Field
 
     public int? GetMineId(int x, int y) =>
         _mineIds.TryGetValue((x, y), out var id) ? id : null;
-    
-    public bool IsSafe(int x, int y)
-    {
-        return IsInBounds(x, y) && _grid[y, x] != '#';
-    }
 
     public bool IsOutOfBounds(int x, int y)
     {
@@ -68,11 +63,6 @@ public class Field
     }
 
     public bool IsInBounds(int x, int y) => !IsOutOfBounds(x, y);
-
-    public char GetCell(int x, int y)
-    {
-        return IsInBounds(x, y) ? _grid[y, x] : '?';
-    }
 
     public void MarkCell(int x, int y, char mark)
     {

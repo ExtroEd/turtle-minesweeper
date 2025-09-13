@@ -6,11 +6,9 @@
     <Grid Background="White">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0 15 0 0">
             
-            <!-- Основной текст окончания -->
             <TextBlock x:Name="EndingText" FontSize="40" FontWeight="Bold" 
                        HorizontalAlignment="Center" Text="Game Over" Margin="0,0,0,100"/>
             
-            <!-- Кнопки -->
             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                 <Button Content="Main Menu" Style="{StaticResource MainButtonStyle}" Click="MainMenu_Click" Margin="0 15 0 0"/>
                 <Button Content="Statistics" Style="{StaticResource MainButtonStyle}" Click="Statistics_Click" Margin="0 15 0 0"/>

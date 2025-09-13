@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Globalization;
+using System.IO;
 
 
 namespace Client.Logic;
@@ -18,14 +19,18 @@ public static class Logger
     public static void StartSession()
     {
         CleanOldLogs();
+        File.AppendAllText(LogFile, Environment.NewLine);
         string marker = $"<----- Start of session ({DateTime.Now:yyyy-MM-dd HH:mm:ss}) ----->{Environment.NewLine}";
         File.AppendAllText(LogFile, marker);
+        File.AppendAllText(LogFile, Environment.NewLine);
     }
 
     public static void EndSession()
     {
+        File.AppendAllText(LogFile, Environment.NewLine);
         string marker = $"<----- End of session ({DateTime.Now:yyyy-MM-dd HH:mm:ss}) ----->{Environment.NewLine}";
         File.AppendAllText(LogFile, marker);
+        File.AppendAllText(LogFile, Environment.NewLine);
     }
 
     // ====== MAP ======
@@ -53,6 +58,7 @@ public static class Logger
     public static void LogTurtleOnMine() => Log("Turtle stepped on a mine!");
     public static void LogTurtleWon() => Log("Turtle reached the flag!");
     public static void LogTurtleOutOfBounds() => Log("Turtle tried to go out of bounds!");
+
     // ====== COMMON LOG ======
     private static void Log(string message)
     {
@@ -70,10 +76,17 @@ public static class Logger
             {
                 int start = line.IndexOf('[') + 1;
                 int end = line.IndexOf(']');
-                if (start <= 0 || end <= 0 || end <= start) return true;
+                if (start <= 0 || end <= 0 || end <= start)
+                    return true;
 
-                if (DateTime.TryParse(line.Substring(start, end - start), out DateTime timestamp))
+                string timestampStr = line.Substring(start, end - start);
+                if (DateTime.TryParseExact(timestampStr, "yyyy-MM-dd HH:mm:ss",
+                                           CultureInfo.InvariantCulture,
+                                           DateTimeStyles.None,
+                                           out DateTime timestamp))
+                {
                     return (DateTime.Now - timestamp) <= TimeSpan.FromMinutes(10);
+                }
 
                 return true;
             })
