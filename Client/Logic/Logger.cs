@@ -20,7 +20,7 @@ public static class Logger
     {
         CleanOldLogs();
         File.AppendAllText(LogFile, Environment.NewLine);
-        string marker = $"<----- Start of session ({DateTime.Now:yyyy-MM-dd HH:mm:ss}) ----->{Environment.NewLine}";
+        var marker = $"<----- Start of session ({DateTime.Now:yyyy-MM-dd HH:mm:ss}) ----->{Environment.NewLine}";
         File.AppendAllText(LogFile, marker);
         File.AppendAllText(LogFile, Environment.NewLine);
     }
@@ -28,7 +28,7 @@ public static class Logger
     public static void EndSession()
     {
         File.AppendAllText(LogFile, Environment.NewLine);
-        string marker = $"<----- End of session ({DateTime.Now:yyyy-MM-dd HH:mm:ss}) ----->{Environment.NewLine}";
+        var marker = $"<----- End of session ({DateTime.Now:yyyy-MM-dd HH:mm:ss}) ----->{Environment.NewLine}";
         File.AppendAllText(LogFile, marker);
         File.AppendAllText(LogFile, Environment.NewLine);
     }
@@ -40,8 +40,8 @@ public static class Logger
     public static void LogMapFinalField(Field field)
     {
         var mines = new List<(int id, int x, int y)>();
-        for (int y = 0; y < field.Size; y++)
-            for (int x = 0; x < field.Size; x++)
+        for (var y = 0; y < field.Size; y++)
+            for (var x = 0; x < field.Size; x++)
                 if (field.IsMine(x, y))
                     mines.Add((field.GetMineId(x, y) ?? -1, x, y));
 
@@ -62,7 +62,7 @@ public static class Logger
     // ====== COMMON LOG ======
     private static void Log(string message)
     {
-        string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
+        var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
         File.AppendAllText(LogFile, line + Environment.NewLine);
     }
 
@@ -74,16 +74,16 @@ public static class Logger
         var lines = File.ReadAllLines(LogFile)
             .Where(line =>
             {
-                int start = line.IndexOf('[') + 1;
-                int end = line.IndexOf(']');
+                var start = line.IndexOf('[') + 1;
+                var end = line.IndexOf(']');
                 if (start <= 0 || end <= 0 || end <= start)
                     return true;
 
-                string timestampStr = line.Substring(start, end - start);
+                var timestampStr = line.Substring(start, end - start);
                 if (DateTime.TryParseExact(timestampStr, "yyyy-MM-dd HH:mm:ss",
                                            CultureInfo.InvariantCulture,
                                            DateTimeStyles.None,
-                                           out DateTime timestamp))
+                                           out var timestamp))
                 {
                     return (DateTime.Now - timestamp) <= TimeSpan.FromMinutes(10);
                 }

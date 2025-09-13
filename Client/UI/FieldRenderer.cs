@@ -16,7 +16,7 @@ public class FieldRenderer
     
     private Fox? _fox;
     private Ellipse? _foxEllipse;
-    private Ellipse _turtleEllipse;
+    private readonly Ellipse _turtleEllipse;
 
     private double _scale = 1.0;
     private double _offsetX;
@@ -34,12 +34,12 @@ public class FieldRenderer
         _turtle = turtle;
 
         _cells = new Rectangle[_field.Size, _field.Size];
-        double cellSize = _canvas.Width / _field.Size;
-        for (int y = 0; y < _field.Size; y++)
+        var cellSize = _canvas.Width / _field.Size;
+        for (var y = 0; y < _field.Size; y++)
         {
-            for (int x = 0; x < _field.Size; x++)
+            for (var x = 0; x < _field.Size; x++)
             {
-                Rectangle rect = new Rectangle
+                var rect = new Rectangle
                 {
                     Width = cellSize,
                     Height = cellSize,
@@ -69,9 +69,9 @@ public class FieldRenderer
 
     private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        double zoomFactor = e.Delta > 0 ? 1.1 : 0.9;
-        double centerX = _canvas.ActualWidth / 2;
-        double centerY = _canvas.ActualHeight / 2;
+        var zoomFactor = e.Delta > 0 ? 1.1 : 0.9;
+        var centerX = _canvas.ActualWidth / 2;
+        var centerY = _canvas.ActualHeight / 2;
 
         _offsetX += (centerX - _offsetX) * (1 - zoomFactor);
         _offsetY += (centerY - _offsetY) * (1 - zoomFactor);
@@ -98,7 +98,7 @@ public class FieldRenderer
     {
         if (!_dragging) return;
 
-        Point pos = e.GetPosition(_canvas);
+        var pos = e.GetPosition(_canvas);
         _offsetX += pos.X - _lastMousePos.X;
         _offsetY += pos.Y - _lastMousePos.Y;
         _lastMousePos = pos;
@@ -109,28 +109,26 @@ public class FieldRenderer
     public void SetFox(Fox fox)
     {
         _fox = fox;
-        if (_foxEllipse == null)
+        if (_foxEllipse != null) return;
+        var cellSize = (_canvas.Width / _field.Size) * _scale;
+        _foxEllipse = new Ellipse
         {
-            double cellSize = (_canvas.Width / _field.Size) * _scale;
-            _foxEllipse = new Ellipse
-            {
-                Width = cellSize * 0.8,
-                Height = cellSize * 0.8,
-                Fill = Brushes.OrangeRed
-            };
-            _canvas.Children.Add(_foxEllipse);
-        }
+            Width = cellSize * 0.8,
+            Height = cellSize * 0.8,
+            Fill = Brushes.OrangeRed
+        };
+        _canvas.Children.Add(_foxEllipse);
     }
 
     private void UpdateCells()
     {
-        double cellSize = (_canvas.Width / _field.Size) * _scale;
+        var cellSize = (_canvas.Width / _field.Size) * _scale;
 
-        for (int y = 0; y < _field.Size; y++)
+        for (var y = 0; y < _field.Size; y++)
         {
-            for (int x = 0; x < _field.Size; x++)
+            for (var x = 0; x < _field.Size; x++)
             {
-                Rectangle rect = _cells[x, y];
+                var rect = _cells[x, y];
                 rect.Width = cellSize;
                 rect.Height = cellSize;
 
@@ -150,14 +148,12 @@ public class FieldRenderer
         Canvas.SetTop(_turtleEllipse, _offsetY + _turtle.Y * cellSize + cellSize * 0.1);
         _turtleEllipse.Width = cellSize * 0.8;
         _turtleEllipse.Height = cellSize * 0.8;
-        
-        if (_fox != null && _foxEllipse != null)
-        {
-            Canvas.SetLeft(_foxEllipse, _offsetX + _fox.X * cellSize + cellSize * 0.1);
-            Canvas.SetTop(_foxEllipse, _offsetY + _fox.Y * cellSize + cellSize * 0.1);
-            _foxEllipse.Width = cellSize * 0.8;
-            _foxEllipse.Height = cellSize * 0.8;
-        }
+
+        if (_fox == null || _foxEllipse == null) return;
+        Canvas.SetLeft(_foxEllipse, _offsetX + _fox.X * cellSize + cellSize * 0.1);
+        Canvas.SetTop(_foxEllipse, _offsetY + _fox.Y * cellSize + cellSize * 0.1);
+        _foxEllipse.Width = cellSize * 0.8;
+        _foxEllipse.Height = cellSize * 0.8;
     }
     
     public void Render()

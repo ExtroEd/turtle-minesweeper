@@ -17,7 +17,7 @@ public class BaseWindow : Window
     private TextBlock? _titleText;
     private TextBlock? _splashText;
 
-    public BaseWindow()
+    protected BaseWindow()
     {
         Background = Brushes.White; // main background
         _timer.Tick += Timer_Tick;
@@ -27,11 +27,11 @@ public class BaseWindow : Window
         WindowStyle = AppState.LastWindowStyle;
     }
 
-    public static class AppState
+    private static class AppState
     {
         public static string? CurrentSplashText;
-        public static WindowState LastWindowState = WindowState.Maximized;
-        public static WindowStyle LastWindowStyle = WindowStyle.None;
+        public const WindowState LastWindowState = WindowState.Maximized;
+        public const WindowStyle LastWindowStyle = WindowStyle.None;
     }
         
     // initializing splash-text in heir
@@ -58,11 +58,9 @@ public class BaseWindow : Window
     {
         base.OnPreviewKeyDown(e);
 
-        if (e.Key == Key.Escape && this is not MainWindow)
-        {
-            GoToMainMenu();
-            e.Handled = true;
-        }
+        if (e.Key != Key.Escape || this is MainWindow) return;
+        GoToMainMenu();
+        e.Handled = true;
     }
 
     private void GoToMainMenu()

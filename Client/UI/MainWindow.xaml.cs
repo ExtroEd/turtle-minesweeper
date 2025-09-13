@@ -20,7 +20,7 @@ public partial class MainWindow
         MainContainer.Children.Clear();
         MainContainer.Children.Add(screen);
         
-        bool isGame = screen is GameControl;
+        var isGame = screen is GameControl;
         TitleText.Visibility = isGame ? Visibility.Collapsed : Visibility.Visible;
         SplashText.Visibility = isGame ? Visibility.Collapsed : Visibility.Visible;
 

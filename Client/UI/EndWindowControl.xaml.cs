@@ -17,7 +17,7 @@ public partial class EndWindowControl
         _timer.Start();
     }
 
-    private void Timer_Tick(object? sender, EventArgs e)
+    private static void Timer_Tick(object? sender, EventArgs e)
     {
         // TODO: shacking
     }

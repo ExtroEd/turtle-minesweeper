@@ -18,19 +18,19 @@ public partial class SinglePlayerControl
 
     private void StartGame_Click(object sender, RoutedEventArgs e)
     {
-        if (!int.TryParse(GridSizeTextBox.Text, out int gridSize) || gridSize < 10 || gridSize > 500)
+        if (!int.TryParse(GridSizeTextBox.Text, out var gridSize) || gridSize < 10 || gridSize > 500)
         {
             MessageBox.Show("Grid Size must be a number between 10 and 500.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
-        if (!int.TryParse(MinePercentTextBox.Text, out int minePercent) || minePercent < 0 || minePercent > 60)
+        if (!int.TryParse(MinePercentTextBox.Text, out var minePercent) || minePercent < 0 || minePercent > 60)
         {
             MessageBox.Show("Mine % must be a number between 0 and 60.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
-        int foxSpeed = 0;
+        var foxSpeed = 0;
         if (EnableFoxCheckBox.IsChecked == true)
         {
             if (!int.TryParse(FoxSpeedTextBox.Text, out foxSpeed) || foxSpeed < 1 || foxSpeed > 10)
@@ -40,7 +40,6 @@ public partial class SinglePlayerControl
             }
         }
 
-        // Создаём GameControl с нужными параметрами
         var gameControl = new GameControl(gridSize, minePercent, foxSpeed);
 
         if (Application.Current.MainWindow is MainWindow main)

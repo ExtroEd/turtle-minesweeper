@@ -18,10 +18,10 @@ public class Turtle
         Logger.LogTurtleCreated(X, Y);
     }
 
-    public void TryMove(int dx, int dy)
+    private void TryMove(int dx, int dy)
     {
-        int newX = X + dx;
-        int newY = Y + dy;
+        var newX = X + dx;
+        var newY = Y + dy;
 
         if (newX < 0 || newY < 0 || newX >= _field.Size || newY >= _field.Size)
         {
@@ -43,12 +43,10 @@ public class Turtle
             return;
         }
 
-        if (X == _field.FlagX && Y == _field.FlagY)
-        {
-            Logger.LogTurtleWon();
-            Logger.EndSession();
-            ShowEndWindow("You reached the flag! 🏁");
-        }
+        if (X != _field.FlagX || Y != _field.FlagY) return;
+        Logger.LogTurtleWon();
+        Logger.EndSession();
+        ShowEndWindow("You reached the flag! 🏁");
     }
 
     public void MoveUp()
@@ -71,7 +69,7 @@ public class Turtle
         TryMove(1, 0);
     }
 
-    private void ShowEndWindow(string text)
+    private static void ShowEndWindow(string text)
     {
         Application.Current.Dispatcher.Invoke(() =>
         {

@@ -2,7 +2,8 @@
 
 public static class SplashTexts
 {
-    public static readonly string[] All = {
+    public static readonly string[] All =
+    [
         "Powered by TurtleForce!",
         "Now with enemy foxes!",
         "You shall not pass!",
@@ -32,5 +33,5 @@ public static class SplashTexts
         "RTX ON: Not really.",
         "Based on a true simulation.",
         "Not sponsored by NVIDIA."
-    };
+    ];
 }

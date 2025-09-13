@@ -1,18 +1,18 @@
 ﻿namespace Client.Logic;
 
-
 public class Field
 {
-    private readonly int _size;
-    private readonly char[,] _grid;
+    private readonly char[,] _grid; //ignore
     private readonly bool[,] _hasMine;
     private readonly Dictionary<(int x, int y), int> _mineIds;
 
-    private int _flagX, _flagY;
-
+    public int Size { get; }
+    public int FlagX { get; private set; }
+    public int FlagY { get; private set; }
+    
     public Field(int size)
     {
-        _size = size;
+        Size = size;
         _grid = new char[size, size];
         _hasMine = new bool[size, size];
         _mineIds = new Dictionary<(int, int), int>();
@@ -21,9 +21,9 @@ public class Field
 
     public void Clear()
     {
-        for (int y = 0; y < _size; y++)
+        for (var y = 0; y < Size; y++)
         {
-            for (int x = 0; x < _size; x++)
+            for (var x = 0; x < Size; x++)
             {
                 _grid[y, x] = '.';
                 _hasMine[y, x] = false;
@@ -36,8 +36,8 @@ public class Field
     public void PlaceFlag(int x, int y)
     {
         if (!IsInBounds(x, y)) return;
-        _flagX = x;
-        _flagY = y;
+        FlagX = x;
+        FlagY = y;
         _grid[y, x] = '$';
     }
 
@@ -59,7 +59,7 @@ public class Field
 
     public bool IsOutOfBounds(int x, int y)
     {
-        return x < 0 || x >= _size || y < 0 || y >= _size;
+        return x < 0 || x >= Size || y < 0 || y >= Size;
     }
 
     public bool IsInBounds(int x, int y) => !IsOutOfBounds(x, y);
@@ -69,8 +69,4 @@ public class Field
         if (IsInBounds(x, y))
             _grid[y, x] = mark;
     }
-
-    public int Size => _size;
-    public int FlagX => _flagX;
-    public int FlagY => _flagY;
 }

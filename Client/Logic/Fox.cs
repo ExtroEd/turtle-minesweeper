@@ -3,34 +3,25 @@
 
 namespace Client.Logic
 {
-    public class Fox
+    public class Fox(
+        int startX,
+        int startY,
+        Field field,
+        Turtle turtle,
+        int speed)
     {
-        public int X { get; private set; }
-        public int Y { get; private set; }
+        public int X { get; private set; } = startX;
+        public int Y { get; private set; } = startY;
 
-        private readonly Turtle _turtle;
-        private readonly Field _field;
-        private readonly AStarPathFinder _pathfinder;
-        private List<(int x, int y)> _path = new();
-        private int _pathIndex = 0;
+        private readonly AStarPathFinder _pathfinder = new(field);
+        private List<(int x, int y)> _path = [];
+        private int _pathIndex;
 
-        private int _speed; // клеток в секунду
+        private readonly int _speed = Math.Clamp(speed, 1, 10);
         private DateTime _lastMoveTime = DateTime.MinValue;
 
         private int _lastTargetX = int.MinValue;
         private int _lastTargetY = int.MinValue;
-
-        public Fox(int startX, int startY, Field field, Turtle turtle, int speed)
-        {
-            X = startX;
-            Y = startY;
-            _field = field;
-            _turtle = turtle;
-            _speed = Math.Clamp(speed, 1, 10);
-            _pathfinder = new AStarPathFinder(field);
-        }
-
-        public void SetSpeed(int speed) => _speed = Math.Clamp(speed, 1, 10);
 
         private bool TargetChanged(int tx, int ty)
         {
@@ -45,24 +36,21 @@ namespace Client.Logic
 
         public void Update()
         {
-            // throttle по скорости
             double msPerStep = 1000.0 / _speed;
             if ((DateTime.Now - _lastMoveTime).TotalMilliseconds < msPerStep) return;
             _lastMoveTime = DateTime.Now;
 
-            int tx = _turtle.X;
-            int ty = _turtle.Y;
+            int tx = turtle.X;
+            int ty = turtle.Y;
 
-            // пересчитать путь, если цель сменилась или путь кончился
-            if (TargetChanged(tx, ty) || _path == null || _pathIndex >= _path.Count)
+            if (TargetChanged(tx, ty) || _pathIndex >= _path.Count)
             {
                 _path = _pathfinder.FindPath(X, Y, tx, ty);
                 _pathIndex = 0;
             }
 
-            if (_path == null || _path.Count == 0) return; // нет пути — ждём
+            if (_path.Count == 0) return;
 
-            // иногда первый элемент пути может быть текущая позиция — пропускаем
             if (_pathIndex < _path.Count && _path[_pathIndex].x == X && _path[_pathIndex].y == Y)
             {
                 _pathIndex++;
@@ -76,8 +64,7 @@ namespace Client.Logic
                 _pathIndex++;
             }
 
-            // проверка поимки черепашки
-            if (X == _turtle.X && Y == _turtle.Y)
+            if (X == turtle.X && Y == turtle.Y)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -88,6 +75,6 @@ namespace Client.Logic
             }
         }
 
-        public void Stop() { /* при необходимости */ }
+        public void Stop() {}
     }
 }
