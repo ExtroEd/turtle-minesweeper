@@ -5,11 +5,11 @@
     
     <Grid>
         <!-- Кнопки меню по центру -->
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="200">
-            <Button Content="Single Player" Click="SinglePlayer_Click" Style="{StaticResource MainButtonStyle}" Margin="0,5"/>
-            <Button Content="Multi Player"  Click="MultiPlayer_Click"  Style="{StaticResource MainButtonStyle}" Margin="0,5"/>
-            <Button Content="Options"       Click="Options_Click"      Style="{StaticResource MainButtonStyle}" Margin="0,5"/>
-            <Button Content="Exit"          Click="Exit_Click"         Style="{StaticResource RedButtonStyle}" Margin="0,5"/>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Button Content="Single Player" Click="SinglePlayer_Click" Style="{StaticResource MainButtonStyle}" Margin="0 15 0 0"/>
+            <Button Content="Multi Player"  Click="MultiPlayer_Click"  Style="{StaticResource MainButtonStyle}" Margin="0 15 0 0"/>
+            <Button Content="Options"       Click="Options_Click"      Style="{StaticResource MainButtonStyle}" Margin="0 15 0 0"/>
+            <Button Content="Exit"          Click="Exit_Click"         Style="{StaticResource RedButtonStyle}" Margin="0 15 0 0"/>
         </StackPanel>
     </Grid>
 </UserControl>

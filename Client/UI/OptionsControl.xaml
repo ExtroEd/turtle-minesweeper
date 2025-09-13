@@ -10,8 +10,8 @@
                 <ComboBoxItem Content="Windowed" />
             </ComboBox>
 
-            <Button Content="Apply Window Mode" Style="{StaticResource MainButtonStyle}" Click="ApplyWindowMode_Click" Margin="0,5,0,0"/>
-            <Button Content="Back" Style="{StaticResource RedButtonStyle}" Click="Back_Click" Margin="0,5,0,0"/>
+            <Button Content="Apply Window Mode" Style="{StaticResource MainButtonStyle}" Click="ApplyWindowMode_Click" Margin="0,15,0,0"/>
+            <Button Content="Back" Style="{StaticResource RedButtonStyle}" Click="Back_Click" Margin="0,15,0,0"/>
         </StackPanel>
     </Grid>
 </UserControl>

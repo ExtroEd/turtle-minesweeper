@@ -133,4 +133,9 @@ public class FieldRenderer
         _turtleEllipse.Width = cellSize * 0.8;
         _turtleEllipse.Height = cellSize * 0.8;
     }
+    
+    public void Render()
+    {
+        UpdateCells();
+    }
 }

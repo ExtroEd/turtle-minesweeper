@@ -50,7 +50,9 @@ public static class Logger
     // ====== TURTLE ======
     public static void LogTurtleCreated(int x, int y) => Log($"Turtle created at ({x}, {y})");
     public static void LogTurtleMoved(int x, int y) => Log($"TurtleMoved to ({x}, {y})");
-
+    public static void LogTurtleOnMine() => Log("Turtle stepped on a mine!");
+    public static void LogTurtleWon() => Log("Turtle reached the flag!");
+    public static void LogTurtleOutOfBounds() => Log("Turtle tried to go out of bounds!");
     // ====== COMMON LOG ======
     private static void Log(string message)
     {
