@@ -24,9 +24,10 @@ public partial class EndWindowControl
 
     private void MainMenu_Click(object sender, RoutedEventArgs e)
     {
-        var main = new MainWindow();
-        main.Show();
-        Close();
+        if (Application.Current.MainWindow is MainWindow main)
+        {
+            main.SwitchContent(new MainMenuControl());
+        }
     }
 
     private void Statistics_Click(object sender, RoutedEventArgs e)

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Client.UI;
 
 
 namespace Client.Logic;
@@ -57,14 +58,17 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
 
         if (X == turtle.X && Y == turtle.Y)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.Invoke((Action)(() =>
             {
                 Logger.LogTurtleEatenByFox();
                 Logger.EndSession();
-                var endWindow = new UI.EndWindowControl("You were eaten by the fox! 🦊");
-                endWindow.Show();
-                Application.Current.MainWindow?.Close();
-            });
+                EnemyManager.Instance.StopAll();
+
+                if (Application.Current.MainWindow is MainWindow main)
+                {
+                    main.SwitchContent(new EndWindowControl("You were eaten by the fox! 🦊"));
+                }
+            }));
         }
     }
 

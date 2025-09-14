@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Client.UI;
 
 
 namespace Client.Logic;
@@ -60,11 +61,11 @@ public class Turtle
 
     private static void ShowEndWindow(string text)
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        Application.Current.Dispatcher.Invoke((Action)(() =>
         {
-            var endWindow = new UI.EndWindowControl(text);
-            endWindow.Show();
-            Application.Current.MainWindow?.Close();
-        });
+            if (Application.Current.MainWindow is not MainWindow main) return;
+            EnemyManager.Instance.StopAll();
+            main.SwitchContent(new EndWindowControl(text));
+        }));
     }
 }

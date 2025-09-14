@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 
+
 namespace Client.UI;
 
 public partial class OptionsControl

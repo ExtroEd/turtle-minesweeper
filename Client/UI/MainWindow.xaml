@@ -10,6 +10,6 @@
         <TextBlock Style="{StaticResource SplashTextStyle}" x:Name="SplashText"/>
 
         <!-- Containers for content -->
-        <Grid x:Name="MainContainer" Margin="0,80,0,0"/>
+        <Grid x:Name="MainContainer"/>
     </Grid>
 </local:BaseWindow>
