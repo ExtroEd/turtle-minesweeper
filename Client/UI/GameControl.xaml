@@ -5,6 +5,6 @@
              KeyDown="OnKeyDown">
     
     <Grid>
-        <Canvas x:Name="GameCanvas" Width="600" Height="600" Background="LightGray"/>
+        <Canvas x:Name="GameCanvas" Width="900" Height="900" Background="LightGray"/>
     </Grid>
 </UserControl>

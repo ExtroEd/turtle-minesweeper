@@ -13,6 +13,7 @@ public class Turtle
     public Turtle(Field field)
     {
         _field = field;
+
         X = 0;
         Y = 0;
         Logger.LogTurtleCreated(X, Y);
@@ -27,6 +28,7 @@ public class Turtle
         {
             Logger.LogTurtleOutOfBounds();
             Logger.EndSession();
+            EnemyManager.Instance.StopAll();
             ShowEndWindow("You fell off the map! 💀");
             return;
         }
@@ -39,6 +41,7 @@ public class Turtle
         {
             Logger.LogTurtleOnMine();
             Logger.EndSession();
+            EnemyManager.Instance.StopAll();
             ShowEndWindow("You stepped on a mine! 💥");
             return;
         }
@@ -46,28 +49,14 @@ public class Turtle
         if (X != _field.FlagX || Y != _field.FlagY) return;
         Logger.LogTurtleWon();
         Logger.EndSession();
+        EnemyManager.Instance.StopAll();
         ShowEndWindow("You reached the flag! 🏁");
     }
 
-    public void MoveUp()
-    {
-        TryMove(0, -1);
-    }
-
-    public void MoveDown()
-    {
-        TryMove(0, 1);
-    }
-
-    public void MoveLeft()
-    {
-        TryMove(-1, 0);
-    }
-
-    public void MoveRight()
-    {
-        TryMove(1, 0);
-    }
+    public void MoveUp() => TryMove(0, -1);
+    public void MoveDown() => TryMove(0, 1);
+    public void MoveLeft() => TryMove(-1, 0);
+    public void MoveRight() => TryMove(1, 0);
 
     private static void ShowEndWindow(string text)
     {
@@ -75,7 +64,6 @@ public class Turtle
         {
             var endWindow = new UI.EndWindowControl(text);
             endWindow.Show();
-
             Application.Current.MainWindow?.Close();
         });
     }

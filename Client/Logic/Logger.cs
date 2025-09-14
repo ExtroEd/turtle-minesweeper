@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.IO;
+﻿using System.IO;
 
 
 namespace Client.Logic;
@@ -18,19 +17,19 @@ public static class Logger
     // ====== SESSIONS ======
     public static void StartSession()
     {
-        CleanOldLogs();
-        File.AppendAllText(LogFile, Environment.NewLine);
+        if (!Directory.Exists(LogsDir))
+            Directory.CreateDirectory(LogsDir);
+
+        File.WriteAllText(LogFile, string.Empty);
+
         var marker = $"<----- Start of session ({DateTime.Now:yyyy-MM-dd HH:mm:ss}) ----->{Environment.NewLine}";
         File.AppendAllText(LogFile, marker);
-        File.AppendAllText(LogFile, Environment.NewLine);
     }
 
     public static void EndSession()
     {
-        File.AppendAllText(LogFile, Environment.NewLine);
         var marker = $"<----- End of session ({DateTime.Now:yyyy-MM-dd HH:mm:ss}) ----->{Environment.NewLine}";
         File.AppendAllText(LogFile, marker);
-        File.AppendAllText(LogFile, Environment.NewLine);
     }
 
     // ====== MAP ======
@@ -58,40 +57,12 @@ public static class Logger
     public static void LogTurtleOnMine() => Log("Turtle stepped on a mine!");
     public static void LogTurtleWon() => Log("Turtle reached the flag!");
     public static void LogTurtleOutOfBounds() => Log("Turtle tried to go out of bounds!");
-
+    public static void LogTurtleEatenByFox() => Log("The turtle was eaten by the fox.");
+    
     // ====== COMMON LOG ======
     private static void Log(string message)
     {
         var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
         File.AppendAllText(LogFile, line + Environment.NewLine);
-    }
-
-    // ====== CLEANER ======
-    private static void CleanOldLogs()
-    {
-        if (!File.Exists(LogFile)) return;
-
-        var lines = File.ReadAllLines(LogFile)
-            .Where(line =>
-            {
-                var start = line.IndexOf('[') + 1;
-                var end = line.IndexOf(']');
-                if (start <= 0 || end <= 0 || end <= start)
-                    return true;
-
-                var timestampStr = line.Substring(start, end - start);
-                if (DateTime.TryParseExact(timestampStr, "yyyy-MM-dd HH:mm:ss",
-                                           CultureInfo.InvariantCulture,
-                                           DateTimeStyles.None,
-                                           out var timestamp))
-                {
-                    return (DateTime.Now - timestamp) <= TimeSpan.FromMinutes(10);
-                }
-
-                return true;
-            })
-            .ToArray();
-
-        File.WriteAllLines(LogFile, lines);
     }
 }

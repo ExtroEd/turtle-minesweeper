@@ -1,80 +1,75 @@
 ﻿using System.Windows;
 
 
-namespace Client.Logic
+namespace Client.Logic;
+
+public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
+    : IEnemy
 {
-    public class Fox(
-        int startX,
-        int startY,
-        Field field,
-        Turtle turtle,
-        int speed)
+    public int X { get; private set; } = startX;
+    public int Y { get; private set; } = startY;
+
+    private readonly AStarPathFinder _pathfinder = new(field);
+    private List<(int x, int y)> _path = [];
+    private int _pathIndex;
+
+    private readonly int _speed = Math.Clamp(speed, 1, 10);
+    private DateTime _lastMoveTime = DateTime.MinValue;
+
+    private int _lastTargetX = int.MinValue;
+    private int _lastTargetY = int.MinValue;
+
+    private bool TargetChanged(int tx, int ty)
     {
-        public int X { get; private set; } = startX;
-        public int Y { get; private set; } = startY;
+        if (tx == _lastTargetX && ty == _lastTargetY) return false;
+        _lastTargetX = tx;
+        _lastTargetY = ty;
+        return true;
+    }
 
-        private readonly AStarPathFinder _pathfinder = new(field);
-        private List<(int x, int y)> _path = [];
-        private int _pathIndex;
+    public void Update()
+    {
+        var msPerStep = 1000.0 / _speed;
+        if ((DateTime.Now - _lastMoveTime).TotalMilliseconds < msPerStep) return;
+        _lastMoveTime = DateTime.Now;
 
-        private readonly int _speed = Math.Clamp(speed, 1, 10);
-        private DateTime _lastMoveTime = DateTime.MinValue;
+        var tx = turtle.X;
+        var ty = turtle.Y;
 
-        private int _lastTargetX = int.MinValue;
-        private int _lastTargetY = int.MinValue;
-
-        private bool TargetChanged(int tx, int ty)
+        if (TargetChanged(tx, ty) || _pathIndex >= _path.Count)
         {
-            if (tx != _lastTargetX || ty != _lastTargetY)
-            {
-                _lastTargetX = tx;
-                _lastTargetY = ty;
-                return true;
-            }
-            return false;
+            _path = _pathfinder.FindPath(X, Y, tx, ty);
+            _pathIndex = 0;
         }
 
-        public void Update()
+        if (_path.Count == 0) return;
+
+        if (_pathIndex < _path.Count && _path[_pathIndex].x == X && _path[_pathIndex].y == Y)
+            _pathIndex++;
+
+        if (_pathIndex < _path.Count)
         {
-            double msPerStep = 1000.0 / _speed;
-            if ((DateTime.Now - _lastMoveTime).TotalMilliseconds < msPerStep) return;
-            _lastMoveTime = DateTime.Now;
-
-            int tx = turtle.X;
-            int ty = turtle.Y;
-
-            if (TargetChanged(tx, ty) || _pathIndex >= _path.Count)
-            {
-                _path = _pathfinder.FindPath(X, Y, tx, ty);
-                _pathIndex = 0;
-            }
-
-            if (_path.Count == 0) return;
-
-            if (_pathIndex < _path.Count && _path[_pathIndex].x == X && _path[_pathIndex].y == Y)
-            {
-                _pathIndex++;
-            }
-
-            if (_pathIndex < _path.Count)
-            {
-                var next = _path[_pathIndex];
-                X = next.x;
-                Y = next.y;
-                _pathIndex++;
-            }
-
-            if (X == turtle.X && Y == turtle.Y)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    var endWindow = new UI.EndWindowControl("You were eaten by the fox! 🦊");
-                    endWindow.Show();
-                    Application.Current.MainWindow?.Close();
-                });
-            }
+            var next = _path[_pathIndex];
+            X = next.x;
+            Y = next.y;
+            _pathIndex++;
         }
 
-        public void Stop() {}
+        if (X == turtle.X && Y == turtle.Y)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Logger.LogTurtleEatenByFox();
+                Logger.EndSession();
+                var endWindow = new UI.EndWindowControl("You were eaten by the fox! 🦊");
+                endWindow.Show();
+                Application.Current.MainWindow?.Close();
+            });
+        }
+    }
+
+    public void Stop()
+    {
+        _path.Clear();
     }
 }

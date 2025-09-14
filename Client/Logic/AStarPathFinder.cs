@@ -2,8 +2,6 @@
 
 public class AStarPathFinder(Field field)
 {
-    private readonly Field _field = field;
-
     private sealed class Node(int x, int y, Node? parent, int g, int h)
     {
         public readonly int X = x;
@@ -15,7 +13,7 @@ public class AStarPathFinder(Field field)
 
     public List<(int x, int y)> FindPath(int startX, int startY, int goalX, int goalY)
     {
-        var size = _field.Size;
+        var size = field.Size;
 
         // gScores: best known cost to reach cell
         var gScores = new int[size, size];
@@ -46,7 +44,7 @@ public class AStarPathFinder(Field field)
                 var nx = current.X + dx;
                 var ny = current.Y + dy;
 
-                if (!_field.IsInBounds(nx, ny) || closed[ny, nx] || _field.IsMine(nx, ny))
+                if (!field.IsInBounds(nx, ny) || closed[ny, nx] || field.IsMine(nx, ny))
                     continue;
 
                 var tentativeG = current.G + 1;
@@ -71,12 +69,12 @@ public class AStarPathFinder(Field field)
 
     private static List<(int x, int y)> ReconstructPath(Node node)
     {
-        var path = new List<(int x, int y)>();
+        var path = new Stack<(int x, int y)>();
         while (node.Parent is not null)
         {
-            path.Insert(0, (node.X, node.Y));
+            path.Push((node.X, node.Y));
             node = node.Parent;
         }
-        return path;
+        return path.ToList();
     }
 }

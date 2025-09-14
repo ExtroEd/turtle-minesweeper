@@ -9,7 +9,6 @@ public partial class GameControl
 {
     private readonly FieldRenderer _fieldRenderer;
     private readonly Turtle _turtle;
-    private readonly Fox? _fox;
 
     public GameControl(int gridSize, int minePercent, int foxSpeed = 0)
     {
@@ -23,13 +22,13 @@ public partial class GameControl
 
         if (foxSpeed > 0)
         {
-            // spawn fox at the flag
             var fx = field.FlagX;
             var fy = field.FlagY;
-            _fox = new Fox(fx, fy, field, _turtle, foxSpeed);
-            _fieldRenderer.SetFox(_fox);
+            var fox = new Fox(fx, fy, field, _turtle, foxSpeed);
+            EnemyManager.Instance.AddEnemy(fox);
+            _fieldRenderer.SetFox(fox);
         }
-
+        
         CompositionTarget.Rendering += GameLoop;
 
         Loaded += (_, _) => Focus();
@@ -37,7 +36,7 @@ public partial class GameControl
 
     private void GameLoop(object? sender, EventArgs e)
     {
-        _fox?.Update();
+        EnemyManager.Instance.UpdateAll();
         _fieldRenderer.Render();
     }
 
