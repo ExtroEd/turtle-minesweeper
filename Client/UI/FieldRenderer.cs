@@ -5,119 +5,153 @@ using System.Windows.Shapes;
 using Client.Logic;
 
 
-namespace Client.UI;
-
-public class FieldRenderer
+namespace Client.UI
 {
-    private readonly Canvas _canvas;
-    private readonly Field _field;
-    private readonly Turtle _turtle;
-    private readonly CanvasTransformController _transform;
-
-    private Fox? _fox;
-    private Ellipse? _foxEllipse;
-    private readonly Ellipse _turtleEllipse;
-
-    private readonly Rectangle[,] _cells;
-
-    public FieldRenderer(Canvas canvas, Field field, Turtle turtle)
+    public class FieldRenderer
     {
-        _canvas = canvas;
-        _field = field;
-        _turtle = turtle;
+        private const int ChunkSize = 10;
 
-        _transform = new CanvasTransformController(_canvas);
+        private readonly Canvas _dynamicLayer;
+        private readonly Field _field;
+        private readonly Turtle _turtle;
+        private readonly CanvasTransformController _transform;
 
-        _cells = new Rectangle[_field.Size, _field.Size];
-        var cellSize = _canvas.Width / _field.Size;
-        for (var y = 0; y < _field.Size; y++)
+        private Fox? _fox;
+        private Ellipse? _foxEllipse;
+        private readonly Ellipse _turtleEllipse;
+
+        private readonly VisualHost _visualHost;
+        private readonly DrawingVisual[,] _chunks;
+        private readonly double _cellSize;
+
+        public FieldRenderer(Canvas parentCanvas, Field field, Turtle turtle)
         {
-            for (var x = 0; x < _field.Size; x++)
+            _field = field;
+            _turtle = turtle;
+
+            _transform = new CanvasTransformController(parentCanvas);
+
+            _cellSize = parentCanvas.Width / _field.Size;
+
+            _visualHost = new VisualHost
             {
-                var rect = new Rectangle
+                RenderTransform = new MatrixTransform()
+            };
+            parentCanvas.Children.Add(_visualHost);
+
+            var chunkCountX = (_field.Size + ChunkSize - 1) / ChunkSize;
+            var chunkCountY = (_field.Size + ChunkSize - 1) / ChunkSize;
+            _chunks = new DrawingVisual[chunkCountX, chunkCountY];
+
+            _dynamicLayer = new Canvas
+            {
+                RenderTransform = new MatrixTransform()
+            };
+            parentCanvas.Children.Add(_dynamicLayer);
+
+            _turtleEllipse = new Ellipse
+            {
+                Fill = Brushes.Green,
+                Width = _cellSize * 0.8,
+                Height = _cellSize * 0.8
+            };
+            _dynamicLayer.Children.Add(_turtleEllipse);
+
+            RenderStatic();
+            Render();
+        }
+
+        public void SetFox(Fox fox)
+        {
+            _fox = fox;
+            if (_foxEllipse != null) return;
+
+            _foxEllipse = new Ellipse
+            {
+                Fill = Brushes.OrangeRed,
+                Width = _cellSize * 0.8,
+                Height = _cellSize * 0.8
+            };
+            _dynamicLayer.Children.Add(_foxEllipse);
+        }
+
+        private void RenderStatic()
+        {
+            var chunkCountX = _chunks.GetLength(0);
+            var chunkCountY = _chunks.GetLength(1);
+
+            for (var cy = 0; cy < chunkCountY; cy++)
+            {
+                for (var cx = 0; cx < chunkCountX; cx++)
                 {
-                    Width = cellSize,
-                    Height = cellSize,
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 0.5,
-                    Fill = Brushes.White
-                };
-                _canvas.Children.Add(rect);
-                _cells[x, y] = rect;
+                    var dv = new DrawingVisual();
+                    using (var dc = dv.RenderOpen())
+                    {
+                        for (var y = 0; y < ChunkSize; y++)
+                        {
+                            for (var x = 0; x < ChunkSize; x++)
+                            {
+                                var gx = cx * ChunkSize + x;
+                                var gy = cy * ChunkSize + y;
+                                if (gx >= _field.Size || gy >= _field.Size) continue;
+
+                                Brush fill;
+                                if (gx == _field.FlagX && gy == _field.FlagY)
+                                    fill = Brushes.Blue;
+                                else if (_field.IsMine(gx, gy))
+                                    fill = Brushes.Red;
+                                else
+                                    fill = Brushes.White;
+
+                                var rect = new Rect(gx * _cellSize, gy * _cellSize, _cellSize, _cellSize);
+                                dc.DrawRectangle(fill, new Pen(Brushes.Black, 0.5), rect);
+                            }
+                        }
+                    }
+                    _chunks[cx, cy] = dv;
+                    _visualHost.AddVisual(dv);
+                }
             }
         }
 
-        _turtleEllipse = new Ellipse
+        public void Render()
         {
-            Width = cellSize * 0.8,
-            Height = cellSize * 0.8,
-            Fill = Brushes.Green
-        };
-        _canvas.Children.Add(_turtleEllipse);
+            var matrix = new Matrix();
+            matrix.Scale(_transform.Scale, _transform.Scale);
+            matrix.Translate(_transform.OffsetX, _transform.OffsetY);
 
-        UpdateCells();
-    }
+            (_visualHost.RenderTransform as MatrixTransform)!.Matrix = matrix;
+            (_dynamicLayer.RenderTransform as MatrixTransform)!.Matrix = matrix;
 
-    public void SetFox(Fox fox)
-    {
-        _fox = fox;
-        if (_foxEllipse != null) return;
-        var cellSize = (_canvas.Width / _field.Size) * _transform.Scale;
-        _foxEllipse = new Ellipse
-        {
-            Width = cellSize * 0.8,
-            Height = cellSize * 0.8,
-            Fill = Brushes.OrangeRed
-        };
-        _canvas.Children.Add(_foxEllipse);
-    }
-
-    private void UpdateCells()
-    {
-        var cellSize = (_canvas.Width / _field.Size) * _transform.Scale;
-
-        for (var y = 0; y < _field.Size; y++)
-        {
-            for (var x = 0; x < _field.Size; x++)
+            if (_turtle.IsVisible)
             {
-                var rect = _cells[x, y];
-                rect.Width = cellSize;
-                rect.Height = cellSize;
-
-                Canvas.SetLeft(rect, _transform.OffsetX + x * cellSize);
-                Canvas.SetTop(rect, _transform.OffsetY + y * cellSize);
-
-                if (x == _field.FlagX && y == _field.FlagY)
-                    rect.Fill = Brushes.Blue;
-                else if (_field.IsMine(x, y))
-                    rect.Fill = Brushes.Red;
-                else
-                    rect.Fill = Brushes.White;
+                Canvas.SetLeft(_turtleEllipse, _turtle.X * _cellSize + _cellSize * 0.1);
+                Canvas.SetTop(_turtleEllipse, _turtle.Y * _cellSize + _cellSize * 0.1);
+                _turtleEllipse.Width = _cellSize * 0.8;
+                _turtleEllipse.Height = _cellSize * 0.8;
+                _turtleEllipse.Visibility = Visibility.Visible;
             }
+            else
+            {
+                _turtleEllipse.Visibility = Visibility.Hidden;
+            }
+
+            if (_fox == null || _foxEllipse == null) return;
+            Canvas.SetLeft(_foxEllipse, _fox.X * _cellSize + _cellSize * 0.1);
+            Canvas.SetTop(_foxEllipse, _fox.Y * _cellSize + _cellSize * 0.1);
+            _foxEllipse.Width = _cellSize * 0.8;
+            _foxEllipse.Height = _cellSize * 0.8;
         }
 
-        if (_turtle.IsVisible)
+        private class VisualHost : FrameworkElement
         {
-            Canvas.SetLeft(_turtleEllipse, _transform.OffsetX + _turtle.X * cellSize + cellSize * 0.1);
-            Canvas.SetTop(_turtleEllipse, _transform.OffsetY + _turtle.Y * cellSize + cellSize * 0.1);
-            _turtleEllipse.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            _turtleEllipse.Visibility = Visibility.Hidden;
-        }
-        _turtleEllipse.Width = cellSize * 0.8;
-        _turtleEllipse.Height = cellSize * 0.8;
+            private readonly VisualCollection _children;
+            public VisualHost() => _children = new VisualCollection(this);
 
-        if (_fox == null || _foxEllipse == null) return;
-        Canvas.SetLeft(_foxEllipse, _transform.OffsetX + _fox.X * cellSize + cellSize * 0.1);
-        Canvas.SetTop(_foxEllipse, _transform.OffsetY + _fox.Y * cellSize + cellSize * 0.1);
-        _foxEllipse.Width = cellSize * 0.8;
-        _foxEllipse.Height = cellSize * 0.8;
-    }
+            public void AddVisual(Visual visual) => _children.Add(visual);
 
-    public void Render()
-    {
-        UpdateCells();
+            protected override int VisualChildrenCount => _children.Count;
+            protected override Visual GetVisualChild(int index) => _children[index];
+        }
     }
 }
