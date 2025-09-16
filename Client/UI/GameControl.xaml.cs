@@ -86,11 +86,12 @@ public partial class GameControl
 
     private void GameSurface_MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        var pos = e.GetPosition(GameSurface);
-        _transform.OnMouseWheel(e.Delta, (float)pos.X, (float)pos.Y);
+        float centerX = (float)GameSurface.ActualWidth / 2;
+        float centerY = (float)GameSurface.ActualHeight / 2;
+        _transform.OnMouseWheel(e.Delta, centerX, centerY);
         GameSurface.InvalidateVisual();
     }
-
+    
     private void GameSurface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         var pos = e.GetPosition(GameSurface);

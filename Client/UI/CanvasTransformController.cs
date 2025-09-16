@@ -12,16 +12,18 @@ public class TransformController
     private bool _dragging;
     private SKPoint _lastMousePos;
 
-    public void OnMouseWheel(float delta, float mouseX, float mouseY)
+    public void OnMouseWheel(float delta, float centerX, float centerY)
     {
+        // Определяем коэффициент зума
         var zoomFactor = delta > 0 ? 1.1f : 0.9f;
 
-        OffsetX = (OffsetX - mouseX) * zoomFactor + mouseX;
-        OffsetY = (OffsetY - mouseY) * zoomFactor + mouseY;
+        // Зум относительно центра экрана
+        OffsetX = (OffsetX - centerX) * zoomFactor + centerX;
+        OffsetY = (OffsetY - centerY) * zoomFactor + centerY;
 
         Scale *= zoomFactor;
     }
-
+    
     public void StartDrag(SKPoint pos)
     {
         _dragging = true;

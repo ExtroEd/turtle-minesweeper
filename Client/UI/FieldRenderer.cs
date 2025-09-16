@@ -54,36 +54,47 @@ public class FieldRenderer
         linePaint.StrokeWidth = Math.Max(1f / (float)_transform.Scale, 0.5f);
         linePaint.IsAntialias = false;
 
-        for (var y = 0; y < _field.Size; y++)
+        const float padding = 10;
+
+        var leftVisible = (-_transform.OffsetX + padding) / (float)_transform.Scale;
+        var topVisible = (-_transform.OffsetY + padding) / (float)_transform.Scale;
+        var rightVisible = (-_transform.OffsetX + canvas.DeviceClipBounds.Width - padding) / (float)_transform.Scale;
+        var bottomVisible = (-_transform.OffsetY + canvas.DeviceClipBounds.Height - padding) / (float)_transform.Scale;
+
+        var xStart = Math.Max((int)Math.Floor(leftVisible / _cellSize), 0);
+        var yStart = Math.Max((int)Math.Floor(topVisible / _cellSize), 0);
+        var xEnd = Math.Min((int)Math.Ceiling(rightVisible / _cellSize), _field.Size);
+        var yEnd = Math.Min((int)Math.Ceiling(bottomVisible / _cellSize), _field.Size);
+
+        for (var y = yStart; y < yEnd; y++)
         {
-            for (var x = 0; x < _field.Size; x++)
+            for (var x = xStart; x < xEnd; x++)
             {
-                if (x == _field.FlagX && y == _field.FlagY)
-                    fillPaint.Color = SKColors.Blue;
-                else if (_field.IsMine(x, y))
-                    fillPaint.Color = SKColors.Red;
-                else
-                    fillPaint.Color = SKColors.White;
+                fillPaint.Color = x == _field.FlagX && y == _field.FlagY ? SKColors.Blue :
+                                  _field.IsMine(x, y) ? SKColors.Red :
+                                  SKColors.White;
 
-                var left = x * _cellSize;
-                var top = y * _cellSize;
-                var right = (x + 1) * _cellSize;
-                var bottom = (y + 1) * _cellSize;
+                var rect = new SKRect(
+                    x * _cellSize,
+                    y * _cellSize,
+                    (x + 1) * _cellSize,
+                    (y + 1) * _cellSize
+                );
 
-                canvas.DrawRect(new SKRect(left, top, right, bottom), fillPaint);
+                canvas.DrawRect(rect, fillPaint);
             }
         }
 
-        for (var y = 0; y <= _field.Size; y++)
+        for (var y = yStart; y <= yEnd; y++)
         {
             var py = y * _cellSize;
-            canvas.DrawLine(0, py, _field.Size * _cellSize, py, linePaint);
+            canvas.DrawLine(xStart * _cellSize, py, xEnd * _cellSize, py, linePaint);
         }
 
-        for (var x = 0; x <= _field.Size; x++)
+        for (var x = xStart; x <= xEnd; x++)
         {
             var px = x * _cellSize;
-            canvas.DrawLine(px, 0, px, _field.Size * _cellSize, linePaint);
+            canvas.DrawLine(px, yStart * _cellSize, px, yEnd * _cellSize, linePaint);
         }
     }
     
