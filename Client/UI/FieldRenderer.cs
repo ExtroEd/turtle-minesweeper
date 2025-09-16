@@ -51,8 +51,8 @@ public class FieldRenderer
         using var linePaint = new SKPaint();
         linePaint.Style = SKPaintStyle.Stroke;
         linePaint.Color = SKColors.Black;
-        linePaint.StrokeWidth = Math.Max(1f / (float)_transform.Scale, 0.5f);
         linePaint.IsAntialias = false;
+        linePaint.StrokeWidth = Math.Max(1f / (float)_transform.Scale, 0.1f);
 
         const float padding = 10;
 
@@ -103,24 +103,33 @@ public class FieldRenderer
         using var paint = new SKPaint();
         paint.IsAntialias = true;
 
+        const float padding = 9;
+
+        var leftVisible = (-_transform.OffsetX + padding) / (float)_transform.Scale;
+        var topVisible = (-_transform.OffsetY + padding) / (float)_transform.Scale;
+        var rightVisible = (-_transform.OffsetX + canvas.DeviceClipBounds.Width - padding) / (float)_transform.Scale;
+        var bottomVisible = (-_transform.OffsetY + canvas.DeviceClipBounds.Height - padding) / (float)_transform.Scale;
+
         if (_turtle.IsVisible)
+            DrawIfVisible(_turtle.X, _turtle.Y, SKColors.Green);
+
+        if (_fox != null)
+            DrawIfVisible(_fox.X, _fox.Y, SKColors.OrangeRed);
+        return;
+
+        void DrawIfVisible(float objX, float objY, SKColor color)
         {
-            paint.Color = SKColors.Green;
+            if (objX + _cellSize < leftVisible || objX > rightVisible ||
+                objY + _cellSize < topVisible || objY > bottomVisible)
+                return;
+
+            paint.Color = color;
             canvas.DrawCircle(
-                _turtle.X * _cellSize + _cellSize / 2,
-                _turtle.Y * _cellSize + _cellSize / 2,
+                objX * _cellSize + _cellSize / 2,
+                objY * _cellSize + _cellSize / 2,
                 _cellSize * 0.4f,
                 paint
             );
         }
-
-        if (_fox == null) return;
-        paint.Color = SKColors.OrangeRed;
-        canvas.DrawCircle(
-            _fox.X * _cellSize + _cellSize / 2,
-            _fox.Y * _cellSize + _cellSize / 2,
-            _cellSize * 0.4f,
-            paint
-        );
     }
 }
