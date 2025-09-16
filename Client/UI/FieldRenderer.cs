@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Client.Logic;
@@ -13,17 +12,11 @@ public class FieldRenderer
     private readonly Canvas _canvas;
     private readonly Field _field;
     private readonly Turtle _turtle;
-    
+    private readonly CanvasTransformController _transform;
+
     private Fox? _fox;
     private Ellipse? _foxEllipse;
     private readonly Ellipse _turtleEllipse;
-
-    private double _scale = 1.0;
-    private double _offsetX;
-    private double _offsetY;
-
-    private bool _dragging;
-    private Point _lastMousePos;
 
     private readonly Rectangle[,] _cells;
 
@@ -32,6 +25,8 @@ public class FieldRenderer
         _canvas = canvas;
         _field = field;
         _turtle = turtle;
+
+        _transform = new CanvasTransformController(_canvas);
 
         _cells = new Rectangle[_field.Size, _field.Size];
         var cellSize = _canvas.Width / _field.Size;
@@ -51,6 +46,7 @@ public class FieldRenderer
                 _cells[x, y] = rect;
             }
         }
+
         _turtleEllipse = new Ellipse
         {
             Width = cellSize * 0.8,
@@ -58,50 +54,6 @@ public class FieldRenderer
             Fill = Brushes.Green
         };
         _canvas.Children.Add(_turtleEllipse);
-        
-        _canvas.MouseWheel += Canvas_MouseWheel;
-        _canvas.MouseLeftButtonDown += Canvas_MouseLeftButtonDown;
-        _canvas.MouseLeftButtonUp += Canvas_MouseLeftButtonUp;
-        _canvas.MouseMove += Canvas_MouseMove;
-
-        UpdateCells();
-    }
-
-    private void Canvas_MouseWheel(object sender, MouseWheelEventArgs e)
-    {
-        var zoomFactor = e.Delta > 0 ? 1.1 : 0.9;
-        var centerX = _canvas.ActualWidth / 2;
-        var centerY = _canvas.ActualHeight / 2;
-
-        _offsetX += (centerX - _offsetX) * (1 - zoomFactor);
-        _offsetY += (centerY - _offsetY) * (1 - zoomFactor);
-
-        _scale *= zoomFactor;
-
-        UpdateCells();
-    }
-
-    private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        _dragging = true;
-        _lastMousePos = e.GetPosition(_canvas);
-        _canvas.CaptureMouse();
-    }
-
-    private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        _dragging = false;
-        _canvas.ReleaseMouseCapture();
-    }
-
-    private void Canvas_MouseMove(object sender, MouseEventArgs e)
-    {
-        if (!_dragging) return;
-
-        var pos = e.GetPosition(_canvas);
-        _offsetX += pos.X - _lastMousePos.X;
-        _offsetY += pos.Y - _lastMousePos.Y;
-        _lastMousePos = pos;
 
         UpdateCells();
     }
@@ -110,7 +62,7 @@ public class FieldRenderer
     {
         _fox = fox;
         if (_foxEllipse != null) return;
-        var cellSize = (_canvas.Width / _field.Size) * _scale;
+        var cellSize = (_canvas.Width / _field.Size) * _transform.Scale;
         _foxEllipse = new Ellipse
         {
             Width = cellSize * 0.8,
@@ -122,7 +74,7 @@ public class FieldRenderer
 
     private void UpdateCells()
     {
-        var cellSize = (_canvas.Width / _field.Size) * _scale;
+        var cellSize = (_canvas.Width / _field.Size) * _transform.Scale;
 
         for (var y = 0; y < _field.Size; y++)
         {
@@ -132,8 +84,8 @@ public class FieldRenderer
                 rect.Width = cellSize;
                 rect.Height = cellSize;
 
-                Canvas.SetLeft(rect, _offsetX + x * cellSize);
-                Canvas.SetTop(rect, _offsetY + y * cellSize);
+                Canvas.SetLeft(rect, _transform.OffsetX + x * cellSize);
+                Canvas.SetTop(rect, _transform.OffsetY + y * cellSize);
 
                 if (x == _field.FlagX && y == _field.FlagY)
                     rect.Fill = Brushes.Blue;
@@ -143,19 +95,27 @@ public class FieldRenderer
                     rect.Fill = Brushes.White;
             }
         }
-        
-        Canvas.SetLeft(_turtleEllipse, _offsetX + _turtle.X * cellSize + cellSize * 0.1);
-        Canvas.SetTop(_turtleEllipse, _offsetY + _turtle.Y * cellSize + cellSize * 0.1);
+
+        if (_turtle.IsVisible)
+        {
+            Canvas.SetLeft(_turtleEllipse, _transform.OffsetX + _turtle.X * cellSize + cellSize * 0.1);
+            Canvas.SetTop(_turtleEllipse, _transform.OffsetY + _turtle.Y * cellSize + cellSize * 0.1);
+            _turtleEllipse.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            _turtleEllipse.Visibility = Visibility.Hidden;
+        }
         _turtleEllipse.Width = cellSize * 0.8;
         _turtleEllipse.Height = cellSize * 0.8;
 
         if (_fox == null || _foxEllipse == null) return;
-        Canvas.SetLeft(_foxEllipse, _offsetX + _fox.X * cellSize + cellSize * 0.1);
-        Canvas.SetTop(_foxEllipse, _offsetY + _fox.Y * cellSize + cellSize * 0.1);
+        Canvas.SetLeft(_foxEllipse, _transform.OffsetX + _fox.X * cellSize + cellSize * 0.1);
+        Canvas.SetTop(_foxEllipse, _transform.OffsetY + _fox.Y * cellSize + cellSize * 0.1);
         _foxEllipse.Width = cellSize * 0.8;
         _foxEllipse.Height = cellSize * 0.8;
     }
-    
+
     public void Render()
     {
         UpdateCells();

@@ -11,6 +11,8 @@ public class Turtle
 
     private readonly Field _field;
 
+    public bool IsVisible { get; private set; } = true;
+
     public Turtle(Field field)
     {
         _field = field;
@@ -58,6 +60,12 @@ public class Turtle
     public void MoveDown() => TryMove(0, 1);
     public void MoveLeft() => TryMove(-1, 0);
     public void MoveRight() => TryMove(1, 0);
+
+    public void TogglePen()
+    {
+        IsVisible = !IsVisible;
+        Logger.LogTurtleVisibility(IsVisible);
+    }
 
     private static void ShowEndWindow(string text)
     {

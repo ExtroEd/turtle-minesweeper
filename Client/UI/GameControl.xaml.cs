@@ -63,6 +63,10 @@ public partial class GameControl
             case Key.D:
                 _turtle.MoveRight();
                 break;
+            
+            case Key.E:
+                _turtle.TogglePen();
+                break;
         }
 
         _fieldRenderer.Render();

@@ -58,6 +58,8 @@ public static class Logger
     public static void LogTurtleWon() => Log("Turtle reached the flag!");
     public static void LogTurtleOutOfBounds() => Log("Turtle tried to go out of bounds!");
     public static void LogTurtleEatenByFox() => Log("The turtle was eaten by the fox.");
+    public static void LogTurtleVisibility(bool isVisible) => 
+        Log($"Turtle visibility: {(isVisible ? "ON" : "OFF")}");    
     
     // ====== COMMON LOG ======
     private static void Log(string message)

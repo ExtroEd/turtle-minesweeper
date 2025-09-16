@@ -34,6 +34,11 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
         if ((DateTime.Now - _lastMoveTime).TotalMilliseconds < msPerStep) return;
         _lastMoveTime = DateTime.Now;
 
+        if (!turtle.IsVisible)
+        {
+            return;
+        }
+        
         var tx = turtle.X;
         var ty = turtle.Y;
 
@@ -56,7 +61,7 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
             _pathIndex++;
         }
 
-        if (X == turtle.X && Y == turtle.Y)
+        if (turtle.IsVisible && X == turtle.X && Y == turtle.Y)
         {
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
