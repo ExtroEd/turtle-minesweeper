@@ -1,157 +1,115 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Shapes;
-using Client.Logic;
+﻿using Client.Logic;
+using SkiaSharp;
 
 
-namespace Client.UI
+namespace Client.UI;
+
+public class FieldRenderer
 {
-    public class FieldRenderer
+    private readonly Field _field;
+    private readonly Turtle _turtle;
+    private Fox? _fox;
+
+    private readonly float _cellSize;
+    private readonly TransformController _transform;
+
+    public FieldRenderer(Field field, Turtle turtle, TransformController transform, float canvasWidth)
     {
-        private const int ChunkSize = 10;
+        _field = field;
+        _turtle = turtle;
+        _transform = transform;
 
-        private readonly Canvas _dynamicLayer;
-        private readonly Field _field;
-        private readonly Turtle _turtle;
-        private readonly CanvasTransformController _transform;
+        _cellSize = canvasWidth / _field.Size;
+    }
 
-        private Fox? _fox;
-        private Ellipse? _foxEllipse;
-        private readonly Ellipse _turtleEllipse;
+    public void SetFox(Fox fox)
+    {
+        _fox = fox;
+    }
 
-        private readonly VisualHost _visualHost;
-        private readonly DrawingVisual[,] _chunks;
-        private readonly double _cellSize;
+    public void Render(SKCanvas canvas)
+    {
+        canvas.Clear(SKColors.LightGray);
 
-        public FieldRenderer(Canvas parentCanvas, Field field, Turtle turtle)
+        canvas.Save();
+        canvas.Translate((float)_transform.OffsetX, (float)_transform.OffsetY);
+        canvas.Scale((float)_transform.Scale, (float)_transform.Scale);
+
+        DrawStaticField(canvas);
+        DrawDynamicObjects(canvas);
+
+        canvas.Restore();
+
+    }
+
+    private void DrawStaticField(SKCanvas canvas)
+    {
+        using var fillPaint = new SKPaint();
+        fillPaint.Style = SKPaintStyle.Fill;
+        fillPaint.IsAntialias = false;
+
+        using var linePaint = new SKPaint();
+        linePaint.Style = SKPaintStyle.Stroke;
+        linePaint.Color = SKColors.Black;
+        linePaint.StrokeWidth = Math.Max(1f / (float)_transform.Scale, 0.5f);
+        linePaint.IsAntialias = false;
+
+        for (var y = 0; y < _field.Size; y++)
         {
-            _field = field;
-            _turtle = turtle;
-
-            _transform = new CanvasTransformController(parentCanvas);
-
-            _cellSize = parentCanvas.Width / _field.Size;
-
-            _visualHost = new VisualHost
+            for (var x = 0; x < _field.Size; x++)
             {
-                RenderTransform = new MatrixTransform()
-            };
-            parentCanvas.Children.Add(_visualHost);
+                if (x == _field.FlagX && y == _field.FlagY)
+                    fillPaint.Color = SKColors.Blue;
+                else if (_field.IsMine(x, y))
+                    fillPaint.Color = SKColors.Red;
+                else
+                    fillPaint.Color = SKColors.White;
 
-            var chunkCountX = (_field.Size + ChunkSize - 1) / ChunkSize;
-            var chunkCountY = (_field.Size + ChunkSize - 1) / ChunkSize;
-            _chunks = new DrawingVisual[chunkCountX, chunkCountY];
+                var left = x * _cellSize;
+                var top = y * _cellSize;
+                var right = (x + 1) * _cellSize;
+                var bottom = (y + 1) * _cellSize;
 
-            _dynamicLayer = new Canvas
-            {
-                RenderTransform = new MatrixTransform()
-            };
-            parentCanvas.Children.Add(_dynamicLayer);
-
-            _turtleEllipse = new Ellipse
-            {
-                Fill = Brushes.Green,
-                Width = _cellSize * 0.8,
-                Height = _cellSize * 0.8
-            };
-            _dynamicLayer.Children.Add(_turtleEllipse);
-
-            RenderStatic();
-            Render();
-        }
-
-        public void SetFox(Fox fox)
-        {
-            _fox = fox;
-            if (_foxEllipse != null) return;
-
-            _foxEllipse = new Ellipse
-            {
-                Fill = Brushes.OrangeRed,
-                Width = _cellSize * 0.8,
-                Height = _cellSize * 0.8
-            };
-            _dynamicLayer.Children.Add(_foxEllipse);
-        }
-
-        private void RenderStatic()
-        {
-            var chunkCountX = _chunks.GetLength(0);
-            var chunkCountY = _chunks.GetLength(1);
-
-            for (var cy = 0; cy < chunkCountY; cy++)
-            {
-                for (var cx = 0; cx < chunkCountX; cx++)
-                {
-                    var dv = new DrawingVisual();
-                    using (var dc = dv.RenderOpen())
-                    {
-                        for (var y = 0; y < ChunkSize; y++)
-                        {
-                            for (var x = 0; x < ChunkSize; x++)
-                            {
-                                var gx = cx * ChunkSize + x;
-                                var gy = cy * ChunkSize + y;
-                                if (gx >= _field.Size || gy >= _field.Size) continue;
-
-                                Brush fill;
-                                if (gx == _field.FlagX && gy == _field.FlagY)
-                                    fill = Brushes.Blue;
-                                else if (_field.IsMine(gx, gy))
-                                    fill = Brushes.Red;
-                                else
-                                    fill = Brushes.White;
-
-                                var rect = new Rect(gx * _cellSize, gy * _cellSize, _cellSize, _cellSize);
-                                dc.DrawRectangle(fill, new Pen(Brushes.Black, 0.5), rect);
-                            }
-                        }
-                    }
-                    _chunks[cx, cy] = dv;
-                    _visualHost.AddVisual(dv);
-                }
+                canvas.DrawRect(new SKRect(left, top, right, bottom), fillPaint);
             }
         }
 
-        public void Render()
+        for (var y = 0; y <= _field.Size; y++)
         {
-            var matrix = new Matrix();
-            matrix.Scale(_transform.Scale, _transform.Scale);
-            matrix.Translate(_transform.OffsetX, _transform.OffsetY);
-
-            (_visualHost.RenderTransform as MatrixTransform)!.Matrix = matrix;
-            (_dynamicLayer.RenderTransform as MatrixTransform)!.Matrix = matrix;
-
-            if (_turtle.IsVisible)
-            {
-                Canvas.SetLeft(_turtleEllipse, _turtle.X * _cellSize + _cellSize * 0.1);
-                Canvas.SetTop(_turtleEllipse, _turtle.Y * _cellSize + _cellSize * 0.1);
-                _turtleEllipse.Width = _cellSize * 0.8;
-                _turtleEllipse.Height = _cellSize * 0.8;
-                _turtleEllipse.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                _turtleEllipse.Visibility = Visibility.Hidden;
-            }
-
-            if (_fox == null || _foxEllipse == null) return;
-            Canvas.SetLeft(_foxEllipse, _fox.X * _cellSize + _cellSize * 0.1);
-            Canvas.SetTop(_foxEllipse, _fox.Y * _cellSize + _cellSize * 0.1);
-            _foxEllipse.Width = _cellSize * 0.8;
-            _foxEllipse.Height = _cellSize * 0.8;
+            var py = y * _cellSize;
+            canvas.DrawLine(0, py, _field.Size * _cellSize, py, linePaint);
         }
 
-        private class VisualHost : FrameworkElement
+        for (var x = 0; x <= _field.Size; x++)
         {
-            private readonly VisualCollection _children;
-            public VisualHost() => _children = new VisualCollection(this);
-
-            public void AddVisual(Visual visual) => _children.Add(visual);
-
-            protected override int VisualChildrenCount => _children.Count;
-            protected override Visual GetVisualChild(int index) => _children[index];
+            var px = x * _cellSize;
+            canvas.DrawLine(px, 0, px, _field.Size * _cellSize, linePaint);
         }
+    }
+    
+    private void DrawDynamicObjects(SKCanvas canvas)
+    {
+        using var paint = new SKPaint();
+        paint.IsAntialias = true;
+
+        if (_turtle.IsVisible)
+        {
+            paint.Color = SKColors.Green;
+            canvas.DrawCircle(
+                _turtle.X * _cellSize + _cellSize / 2,
+                _turtle.Y * _cellSize + _cellSize / 2,
+                _cellSize * 0.4f,
+                paint
+            );
+        }
+
+        if (_fox == null) return;
+        paint.Color = SKColors.OrangeRed;
+        canvas.DrawCircle(
+            _fox.X * _cellSize + _cellSize / 2,
+            _fox.Y * _cellSize + _cellSize / 2,
+            _cellSize * 0.4f,
+            paint
+        );
     }
 }
