@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows;
@@ -12,6 +13,17 @@ public partial class MainWindow
         InitializeComponent();
 
         InitSplash(TitleText, SplashText);
+
+        try
+        {
+            var version = File.ReadAllText("version.txt").Trim();
+            VersionText.Text = $"Alpha {version}";
+        }
+        catch
+        {
+            VersionText.Text = "Alpha 0.0.0";
+        }
+
         SwitchContent(new MainMenuControl());
     }
 
@@ -23,6 +35,7 @@ public partial class MainWindow
         var isGame = screen is GameControl;
         TitleText.Visibility = isGame ? Visibility.Collapsed : Visibility.Visible;
         SplashText.Visibility = isGame ? Visibility.Collapsed : Visibility.Visible;
+        VersionText.Visibility = isGame ? Visibility.Collapsed : Visibility.Visible;
 
         Background = isGame ? Brushes.LightGray : Brushes.White;
     }

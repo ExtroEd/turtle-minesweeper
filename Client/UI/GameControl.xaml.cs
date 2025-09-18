@@ -36,7 +36,6 @@ public partial class GameControl
         Loaded += (_, _) =>
         {
             Focus();
-            // Подключаем события мыши
             GameSurface.MouseWheel += GameSurface_MouseWheel;
             GameSurface.MouseLeftButtonDown += GameSurface_MouseLeftButtonDown;
             GameSurface.MouseLeftButtonUp += GameSurface_MouseLeftButtonUp;
@@ -86,8 +85,8 @@ public partial class GameControl
 
     private void GameSurface_MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        float centerX = (float)GameSurface.ActualWidth / 2;
-        float centerY = (float)GameSurface.ActualHeight / 2;
+        var centerX = (float)GameSurface.ActualWidth / 2;
+        var centerY = (float)GameSurface.ActualHeight / 2;
         _transform.OnMouseWheel(e.Delta, centerX, centerY);
         GameSurface.InvalidateVisual();
     }

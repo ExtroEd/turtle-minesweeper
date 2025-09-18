@@ -4,7 +4,6 @@
              Width="Auto" Height="Auto">
     
     <Grid>
-        <!-- Кнопки меню по центру -->
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
             <Button Content="Single Player" Click="SinglePlayer_Click" Style="{StaticResource MainButtonStyle}" Margin="0 15 0 0"/>
             <Button Content="Multi Player"  Click="MultiPlayer_Click"  Style="{StaticResource MainButtonStyle}" Margin="0 15 0 0"/>

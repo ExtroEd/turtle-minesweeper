@@ -14,10 +14,8 @@ public class TransformController
 
     public void OnMouseWheel(float delta, float centerX, float centerY)
     {
-        // Определяем коэффициент зума
         var zoomFactor = delta > 0 ? 1.1f : 0.9f;
 
-        // Зум относительно центра экрана
         OffsetX = (OffsetX - centerX) * zoomFactor + centerX;
         OffsetY = (OffsetY - centerY) * zoomFactor + centerY;
 

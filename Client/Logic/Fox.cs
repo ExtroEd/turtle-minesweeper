@@ -20,6 +20,8 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
     private int _lastTargetX = int.MinValue;
     private int _lastTargetY = int.MinValue;
 
+    private bool _isActive = true;
+
     private bool TargetChanged(int tx, int ty)
     {
         if (tx == _lastTargetX && ty == _lastTargetY) return false;
@@ -30,15 +32,15 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
 
     public void Update()
     {
+        if (!_isActive) return;
+
         var msPerStep = 1000.0 / _speed;
         if ((DateTime.Now - _lastMoveTime).TotalMilliseconds < msPerStep) return;
         _lastMoveTime = DateTime.Now;
 
         if (!turtle.IsVisible)
-        {
             return;
-        }
-        
+
         var tx = turtle.X;
         var ty = turtle.Y;
 
@@ -80,5 +82,6 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
     public void Stop()
     {
         _path.Clear();
+        _isActive = false;
     }
 }

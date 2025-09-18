@@ -119,8 +119,13 @@ public class FieldRenderer
 
         void DrawIfVisible(float objX, float objY, SKColor color)
         {
-            if (objX + _cellSize < leftVisible || objX > rightVisible ||
-                objY + _cellSize < topVisible || objY > bottomVisible)
+            var leftCell   = leftVisible / _cellSize;
+            var rightCell  = rightVisible / _cellSize;
+            var topCell    = topVisible / _cellSize;
+            var bottomCell = bottomVisible / _cellSize;
+
+            if (objX + 1 < leftCell || objX > rightCell ||
+                objY + 1 < topCell  || objY > bottomCell)
                 return;
 
             paint.Color = color;

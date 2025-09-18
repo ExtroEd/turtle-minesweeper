@@ -6,7 +6,6 @@
              KeyDown="OnKeyDown">
 
     <Grid>
-        <!-- Вместо Canvas используем SkiaSharp -->
         <skia:SKElement x:Name="GameSurface" PaintSurface="OnPaintSurface"
                         MouseWheel="GameSurface_MouseWheel"
                         MouseLeftButtonDown="GameSurface_MouseLeftButtonDown"

@@ -29,7 +29,7 @@
     
     <!-- Version text style -->
     <Style x:Key="VersionTextStyle" TargetType="TextBlock">
-        <Setter Property="Text" Value="Version 0.1.0"/>
+        <Setter Property="Text" Value="Alpha 0.1.0"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Foreground" Value="Black"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
