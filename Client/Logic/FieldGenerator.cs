@@ -56,22 +56,31 @@ public class FieldGenerator(Field field, Random random)
     {
         var size = field.Size;
         var numberOfMines = (int)(size * size * (minePercentage / 100.0));
-        var placedMines = 0;
 
-        while (placedMines < numberOfMines)
+        var candidates = new List<Point>(size * size);
+        for (var y = 0; y < size; y++)
         {
-            var x = random.Next(size);
-            var y = random.Next(size);
-            Point candidate = new(x, y);
+            for (var x = 0; x < size; x++)
+            {
+                if ((x == 0 && y == 0) || (x == field.FlagX && y == field.FlagY))
+                    continue;
+                if (pathSet.Contains(new Point(x, y)))
+                    continue;
 
-            if ((x == 0 && y == 0) || (x == field.FlagX && y == field.FlagY) || pathSet.Contains(candidate))
-                continue;
+                candidates.Add(new Point(x, y));
+            }
+        }
 
-            if (field.IsMine(x, y)) continue;
+        for (var i = candidates.Count - 1; i > 0; i--)
+        {
+            var j = random.Next(i + 1);
+            (candidates[i], candidates[j]) = (candidates[j], candidates[i]);
+        }
 
-            var mineId = placedMines + 1;
-            field.PlaceMine(x, y, mineId);
-            placedMines++;
+        for (var i = 0; i < numberOfMines && i < candidates.Count; i++)
+        {
+            var p = candidates[i];
+            field.PlaceMine(p.X, p.Y, i + 1);
         }
     }
 

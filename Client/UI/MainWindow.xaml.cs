@@ -16,12 +16,18 @@ public partial class MainWindow
 
         try
         {
-            var version = File.ReadAllText("version.txt").Trim();
+            var exePath = AppContext.BaseDirectory;
+    
+            var clientDir = Path.GetFullPath(Path.Combine(exePath, "..", "..", ".."));
+    
+            var versionPath = Path.Combine(clientDir, "version.txt");
+
+            var version = File.ReadAllText(versionPath).Trim();
             VersionText.Text = $"Alpha {version}";
         }
         catch
         {
-            VersionText.Text = "Alpha 0.0.0";
+            VersionText.Text = "Version not found";
         }
 
         SwitchContent(new MainMenuControl());

@@ -46,14 +46,14 @@ public static class Logger
 
         Log("Final field generated:");
         foreach (var mine in mines.OrderBy(m => m.id))
-            Log($"Mine #{mine.id} at ({mine.x}, {mine.y})");
+            Log($"Mine #{mine.id} ({mine.x}, {mine.y})");
 
         Log($"Flag at ({field.FlagX}, {field.FlagY})");
     }
 
     // ====== TURTLE ======
     public static void LogTurtleCreated(int x, int y) => Log($"Turtle created at ({x}, {y})");
-    public static void LogTurtleMoved(int x, int y) => Log($"TurtleMoved to ({x}, {y})");
+    public static void LogTurtleMoved(int x, int y) => Log($"Turtle ({x}, {y})");
     public static void LogTurtleOnMine() => Log("Turtle stepped on a mine!");
     public static void LogTurtleWon() => Log("Turtle reached the flag!");
     public static void LogTurtleOutOfBounds() => Log("Turtle tried to go out of bounds!");
@@ -64,7 +64,7 @@ public static class Logger
     // ====== COMMON LOG ======
     private static void Log(string message)
     {
-        var line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
+        var line = $"[{DateTime.Now:mm:ss}] {message}";
         File.AppendAllText(LogFile, line + Environment.NewLine);
     }
 }
