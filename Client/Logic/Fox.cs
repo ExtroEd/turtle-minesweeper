@@ -67,8 +67,6 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
         {
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
-                Logger.LogTurtleEatenByFox();
-                Logger.EndSession();
                 EnemyManager.Instance.StopAll();
 
                 if (Application.Current.MainWindow is MainWindow main)

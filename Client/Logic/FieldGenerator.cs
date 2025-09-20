@@ -5,13 +5,13 @@ namespace Client.Logic;
 
 public class FieldGenerator(Field field, Random random)
 {
-    public void Generate(int minePercentage)
+    public void Generate(int minePercentage, IProgress<string>? progress = null)
     {
-        Logger.StartSession();
+        progress?.Report("🔄 Field generation started...");
         field.Clear();
-        Logger.LogFieldCleared();
+        progress?.Report("Field cleared.");
 
-        PlaceFlagRandom();
+        PlaceFlagRandom(progress);
 
         var size = field.Size;
         var reservedPercent = size < 20 ? 2.0 : 1.0;
@@ -26,21 +26,24 @@ public class FieldGenerator(Field field, Random random)
         {
             path = GenerateRandomPath(0, 0, field.FlagX, field.FlagY);
             attempts++;
-        } while (path.Count > maxPathLength && attempts < maxAttempts);
+            progress?.Report($"Attempt #{attempts}: path length {path.Count}");
+        } 
+        while (path.Count > maxPathLength && attempts < maxAttempts);
 
-        if (attempts == maxAttempts)
-            Logger.LogPathGenerationFailed();
+        progress?.Report(attempts == maxAttempts
+            ? "❌ Failed to generate a valid path."
+            : $"✅ Path found: {path.Count} cells.");
 
         HashSet<Point> pathSet = new(path);
         foreach (var p in pathSet)
             field.MarkCell(p.X, p.Y, '.');
 
-        PlaceMinesExcludingPath(minePercentage, pathSet);
+        PlaceMinesExcludingPath(minePercentage, pathSet, progress);
 
-        Logger.LogMapFinalField(field);
+        progress?.Report("🏁 Generation complete.");
     }
     
-    private void PlaceFlagRandom()
+    private void PlaceFlagRandom(IProgress<string>? progress)
     {
         var size = field.Size;
         var onBottomBorder = random.Next(2) == 0;
@@ -50,12 +53,15 @@ public class FieldGenerator(Field field, Random random)
 
         if (x == 0 && y == 0) x = 1;
         field.PlaceFlag(x, y);
+
+        progress?.Report($"Flag placed at ({x},{y}).");
     }
 
-    private void PlaceMinesExcludingPath(int minePercentage, HashSet<Point> pathSet)
+    private void PlaceMinesExcludingPath(int minePercentage, HashSet<Point> pathSet, IProgress<string>? progress)
     {
         var size = field.Size;
         var numberOfMines = (int)(size * size * (minePercentage / 100.0));
+        progress?.Report($"Placing {numberOfMines} mines...");
 
         var candidates = new List<Point>(size * size);
         for (var y = 0; y < size; y++)
@@ -81,7 +87,12 @@ public class FieldGenerator(Field field, Random random)
         {
             var p = candidates[i];
             field.PlaceMine(p.X, p.Y, i + 1);
+
+            if (i % (numberOfMines / 10 + 1) == 0)
+                progress?.Report($"Placed {i + 1}/{numberOfMines} mines...");
         }
+
+        progress?.Report("All mines placed.");
     }
 
     private List<Point> GenerateRandomPath(int startX, int startY, int endX, int endY)

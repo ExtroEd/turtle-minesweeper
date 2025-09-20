@@ -4,7 +4,6 @@ public class Field
 {
     private readonly char[,] _grid; //ignore
     private readonly bool[,] _hasMine;
-    private readonly Dictionary<(int x, int y), int> _mineIds;
 
     public int Size { get; }
     public int FlagX { get; private set; }
@@ -15,7 +14,6 @@ public class Field
         Size = size;
         _grid = new char[size, size];
         _hasMine = new bool[size, size];
-        _mineIds = new Dictionary<(int, int), int>();
         Clear();
     }
 
@@ -29,8 +27,6 @@ public class Field
                 _hasMine[y, x] = false;
             }
         }
-        _mineIds.Clear();
-        Logger.LogFieldCleared();
     }
 
     public void PlaceFlag(int x, int y)
@@ -46,16 +42,12 @@ public class Field
         if (!IsInBounds(x, y)) return;
         _grid[y, x] = '#';
         _hasMine[y, x] = true;
-        _mineIds[(x, y)] = mineId;
     }
 
     public bool IsMine(int x, int y)
     {
         return IsInBounds(x, y) && _hasMine[y, x];
     }
-
-    public int? GetMineId(int x, int y) =>
-        _mineIds.TryGetValue((x, y), out var id) ? id : null;
 
     public bool IsOutOfBounds(int x, int y)
     {

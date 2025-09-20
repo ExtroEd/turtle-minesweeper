@@ -40,11 +40,11 @@ public partial class SinglePlayerControl
             }
         }
 
-        var gameControl = new GameControl(gridSize, minePercent, foxSpeed);
+        var loadingControl = new LoadingControl(gridSize, minePercent, foxSpeed);
 
         if (Application.Current.MainWindow is MainWindow main)
         {
-            main.SwitchContent(gameControl);
+            main.SwitchContent(loadingControl);
         }
     }
 
