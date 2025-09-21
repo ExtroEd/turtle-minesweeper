@@ -5,23 +5,32 @@ namespace Client.UI;
 
 public class TransformController
 {
-    public double Scale { get; private set; } = 1.0;
-    public double OffsetX { get; private set; }
-    public double OffsetY { get; private set; }
+    public float Scale { get; private set; } = 1f;
+    public float OffsetX { get; set; }
+    public float OffsetY { get; set; }
 
     private bool _dragging;
     private SKPoint _lastMousePos;
 
-    public void OnMouseWheel(float delta, float centerX, float centerY)
+    private const float CellSize = 20f;
+
+    public void OnMouseWheel(float delta, float centerX, float centerY, float viewportWidth)
     {
         var zoomFactor = delta > 0 ? 1.1f : 0.9f;
+        var newScale = Scale * zoomFactor;
 
-        OffsetX = (OffsetX - centerX) * zoomFactor + centerX;
-        OffsetY = (OffsetY - centerY) * zoomFactor + centerY;
+        var maxScale = viewportWidth / (CellSize * 10f);
+        var minScale = viewportWidth / (CellSize * 100f);
 
-        Scale *= zoomFactor;
+        if (newScale > maxScale) newScale = maxScale;
+        if (newScale < minScale) newScale = minScale;
+
+        OffsetX = (OffsetX - centerX) * (newScale / Scale) + centerX;
+        OffsetY = (OffsetY - centerY) * (newScale / Scale) + centerY;
+
+        Scale = newScale;
     }
-    
+
     public void StartDrag(SKPoint pos)
     {
         _dragging = true;
@@ -36,8 +45,7 @@ public class TransformController
         _lastMousePos = pos;
     }
 
-    public void EndDrag()
-    {
-        _dragging = false;
-    }
+    public void EndDrag() => _dragging = false;
+
+    public static float GetCellSize() => CellSize;
 }

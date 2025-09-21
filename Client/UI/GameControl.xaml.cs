@@ -9,9 +9,9 @@ namespace Client.UI;
 
 public partial class GameControl
 {
-    private readonly FieldRenderer _fieldRenderer;
     private readonly Turtle _turtle;
     private readonly TransformController _transform = new();
+    private readonly FieldRenderer _fieldRenderer;
 
     public GameControl(int gridSize, int minePercent, int foxSpeed = 0)
     {
@@ -21,26 +21,40 @@ public partial class GameControl
         new FieldGenerator(field, new Random()).Generate(minePercent);
 
         _turtle = new Turtle(field);
-        _fieldRenderer = new FieldRenderer(field, _turtle, _transform, 1920);
-
-        if (foxSpeed > 0)
-        {
-            var fx = field.FlagX;
-            var fy = field.FlagY;
-            var fox = new Fox(fx, fy, field, _turtle, foxSpeed);
-            EnemyManager.Instance.AddEnemy(fox);
-            _fieldRenderer.SetFox(fox);
-        }
+        _fieldRenderer = new FieldRenderer(field, _turtle, _transform, 1, 1);
+        _fieldRenderer.RebuildMinesLayer(); // пересобираем слой мин сразу после генерации
 
         CompositionTarget.Rendering += GameLoop;
+
         Loaded += (_, _) =>
         {
             Focus();
+            UpdateFieldRenderer();
+
+            if (foxSpeed > 0)
+            {
+                var fx = field.FlagX;
+                var fy = field.FlagY;
+                var fox = new Fox(fx, fy, field, _turtle, foxSpeed);
+                EnemyManager.Instance.AddEnemy(fox);
+                _fieldRenderer.SetFox(fox);
+            }
+
             GameSurface.MouseWheel += GameSurface_MouseWheel;
             GameSurface.MouseLeftButtonDown += GameSurface_MouseLeftButtonDown;
             GameSurface.MouseLeftButtonUp += GameSurface_MouseLeftButtonUp;
             GameSurface.MouseMove += GameSurface_MouseMove;
+
+            GameSurface.SizeChanged += (_, _) => UpdateFieldRenderer();
         };
+    }
+
+    private void UpdateFieldRenderer()
+    {
+        var canvasWidth = (float)GameSurface.ActualWidth;
+        var canvasHeight = (float)GameSurface.ActualHeight;
+
+        _fieldRenderer.CenterOnTurtle(canvasWidth, canvasHeight);
     }
 
     private void GameLoop(object? sender, EventArgs e)
@@ -52,8 +66,9 @@ public partial class GameControl
     private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
     {
         var canvas = e.Surface.Canvas;
-        canvas.Clear(SKColors.LightGray);
-        _fieldRenderer.Render(canvas);
+        canvas.Clear(SKColors.Gray);
+
+        _fieldRenderer.Render(canvas, (float)GameSurface.ActualWidth, (float)GameSurface.ActualHeight);
     }
 
     private void OnKeyDown(object sender, KeyEventArgs e)
@@ -61,36 +76,28 @@ public partial class GameControl
         switch (e.Key)
         {
             case Key.Up:
-            case Key.W:
-                _turtle.MoveUp();
-                break;
+            case Key.W: _turtle.MoveUp(); break;
             case Key.Down:
-            case Key.S:
-                _turtle.MoveDown();
-                break;
+            case Key.S: _turtle.MoveDown(); break;
             case Key.Left:
-            case Key.A:
-                _turtle.MoveLeft();
-                break;
+            case Key.A: _turtle.MoveLeft(); break;
             case Key.Right:
-            case Key.D:
-                _turtle.MoveRight();
-                break;
-            case Key.E:
-                _turtle.TogglePen();
-                break;
+            case Key.D: _turtle.MoveRight(); break;
+            case Key.E: _turtle.TogglePen(); break;
         }
         GameSurface.InvalidateVisual();
     }
 
     private void GameSurface_MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        var centerX = (float)GameSurface.ActualWidth / 2;
+        var viewportWidth = (float)GameSurface.ActualWidth;
+        var centerX = viewportWidth / 2;
         var centerY = (float)GameSurface.ActualHeight / 2;
-        _transform.OnMouseWheel(e.Delta, centerX, centerY);
+
+        _transform.OnMouseWheel(e.Delta, centerX, centerY, viewportWidth);
         GameSurface.InvalidateVisual();
     }
-    
+
     private void GameSurface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         var pos = e.GetPosition(GameSurface);

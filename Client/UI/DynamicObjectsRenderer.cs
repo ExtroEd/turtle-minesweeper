@@ -19,10 +19,10 @@ public class DynamicObjectsRenderer(
         paint.IsAntialias = true;
         const float padding = 9;
 
-        var leftVisible = (-transform.OffsetX + padding) / (float)transform.Scale;
-        var topVisible = (-transform.OffsetY + padding) / (float)transform.Scale;
-        var rightVisible = (-transform.OffsetX + canvas.DeviceClipBounds.Width - padding) / (float)transform.Scale;
-        var bottomVisible = (-transform.OffsetY + canvas.DeviceClipBounds.Height - padding) / (float)transform.Scale;
+        var leftVisible = (-transform.OffsetX + padding) / transform.Scale;
+        var topVisible = (-transform.OffsetY + padding) / transform.Scale;
+        var rightVisible = (-transform.OffsetX + canvas.DeviceClipBounds.Width - padding) / transform.Scale;
+        var bottomVisible = (-transform.OffsetY + canvas.DeviceClipBounds.Height - padding) / transform.Scale;
 
         if (turtle.IsVisible)
             DrawIfVisible(turtle.X, turtle.Y, SKColors.Green);
