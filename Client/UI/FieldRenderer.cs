@@ -28,15 +28,16 @@ public class FieldRenderer
 
     public void SetFox(Fox fox) => _objectsRenderer.SetFox(fox);
 
-    public void Render(SKCanvas canvas, float viewportWidth, float viewportHeight)
+    public void Render(SKCanvas canvas)
     {
+        Profiler.Mark("FPS");
         canvas.Clear(SKColors.LightGray);
 
         canvas.Save();
         canvas.Translate(_transform.OffsetX, _transform.OffsetY);
         canvas.Scale(_transform.Scale, _transform.Scale);
 
-        _gridRenderer.Draw(canvas, viewportWidth, viewportHeight);
+        _gridRenderer.Draw(canvas);
         _objectsRenderer.Draw(canvas);
 
         canvas.Restore();
@@ -50,6 +51,6 @@ public class FieldRenderer
     
     public void RebuildMinesLayer()
     {
-        _gridRenderer.RebuildMinesLayer();
+        _gridRenderer.RebuildGridLayer();
     }
 }

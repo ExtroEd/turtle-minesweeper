@@ -1,114 +1,85 @@
-﻿using Client.Logic;
-using SkiaSharp;
+﻿using SkiaSharp;
+using Client.Logic;
 
 
 namespace Client.UI;
 
-public class FieldGridRenderer(
-    Field field,
-    TransformController transform,
-    float cellSize)
+public class FieldGridRenderer
 {
-    private SKPicture? _minesLayer;
-    
-    public void RebuildMinesLayer()
+    private readonly Field _field;
+    private readonly TransformController _transform;
+    private readonly float _cellSize;
+
+    private SKImage? _gridImage;
+    private readonly MinesRenderer _minesRenderer;
+
+    public FieldGridRenderer(Field field, TransformController transform, float cellSize)
     {
-        var recorder = new SKPictureRecorder();
-        var canvas = recorder.BeginRecording(
-            new SKRect(0, 0, field.Size * cellSize, field.Size * cellSize));
+        _field = field ?? throw new ArgumentNullException(nameof(field));
+        _transform = transform ?? throw new ArgumentNullException(nameof(transform));
+        _cellSize = cellSize;
 
-        using var minePaint = new SKPaint();
-        minePaint.Style = SKPaintStyle.Fill;
-        minePaint.Color = SKColors.Red;
-        minePaint.IsAntialias = false;
+        _minesRenderer = new MinesRenderer(field, cellSize);
 
-        for (var y = 0; y < field.Size; y++)
-        {
-            for (var x = 0; x < field.Size; x++)
-            {
-                if (!field.IsMine(x, y))
-                    continue;
-
-                var rect = new SKRect(
-                    x * cellSize,
-                    y * cellSize,
-                    (x + 1) * cellSize,
-                    (y + 1) * cellSize
-                );
-
-                canvas.DrawRect(rect, minePaint);
-            }
-        }
-
-        _minesLayer?.Dispose();
-        _minesLayer = recorder.EndRecording();
+        RebuildGridLayer();
     }
 
-    public void Draw(SKCanvas canvas, float viewportWidth, float viewportHeight)
+    public void RebuildGridLayer()
     {
-        const float padding = 10f;
+        _minesRenderer.RebuildMinesLayer();
 
-        var leftVisible = (-transform.OffsetX + padding) / transform.Scale;
-        var topVisible = (-transform.OffsetY + padding) / transform.Scale;
-        var rightVisible = (-transform.OffsetX + viewportWidth - padding) / transform.Scale;
-        var bottomVisible = (-transform.OffsetY + viewportHeight - padding) / transform.Scale;
+        int width = (int)(_field.Size * _cellSize);
+        int height = (int)(_field.Size * _cellSize);
+        var info = new SKImageInfo(width, height);
 
-        var xStart = Math.Max((int)Math.Floor(leftVisible / cellSize), 0);
-        var yStart = Math.Max((int)Math.Floor(topVisible / cellSize), 0);
-        var xEnd = Math.Min((int)Math.Ceiling(rightVisible / cellSize), field.Size);
-        var yEnd = Math.Min((int)Math.Ceiling(bottomVisible / cellSize), field.Size);
+        using var surface = SKSurface.Create(info);
+        var canvas = surface.Canvas;
+        canvas.Clear(SKColors.White);
 
-        using (var bgPaint = new SKPaint())
-        {
-            bgPaint.Style = SKPaintStyle.Fill;
-            bgPaint.Color = SKColors.White;
-            bgPaint.IsAntialias = false;
-            var backgroundRect = new SKRect(
-                0,
-                0,
-                field.Size * cellSize,
-                field.Size * cellSize
-            );
-            canvas.DrawRect(backgroundRect, bgPaint);
-        }
-
-        if (_minesLayer != null)
-        {
-            canvas.DrawPicture(_minesLayer);
-        }
-        
-        if (field is { FlagX: >= 0, FlagY: >= 0 })
-        {
-            using var flagPaint = new SKPaint();
-            flagPaint.Style = SKPaintStyle.Fill;
-            flagPaint.Color = SKColors.Blue;
-            flagPaint.IsAntialias = false;
-
-            var rect = new SKRect(
-                field.FlagX * cellSize,
-                field.FlagY * cellSize,
-                (field.FlagX + 1) * cellSize,
-                (field.FlagY + 1) * cellSize
-            );
-            canvas.DrawRect(rect, flagPaint);
-        }
+        _minesRenderer.Draw(canvas, _transform);
 
         using var linePaint = new SKPaint();
         linePaint.Style = SKPaintStyle.Stroke;
         linePaint.Color = SKColors.Black;
         linePaint.IsAntialias = false;
-        linePaint.StrokeWidth = Math.Max(1f / transform.Scale, 0.1f);
-
-        for (var y = yStart; y <= yEnd; y++)
+        linePaint.StrokeWidth = 1;
+        for (int y = 0; y <= _field.Size; y++)
         {
-            var py = y * cellSize;
-            canvas.DrawLine(xStart * cellSize, py, xEnd * cellSize, py, linePaint);
+            float py = y * _cellSize;
+            canvas.DrawLine(0, py, _field.Size * _cellSize, py, linePaint);
+            Profiler.Mark("DrawGridY");
+        }
+        for (int x = 0; x <= _field.Size; x++)
+        {
+            float px = x * _cellSize;
+            canvas.DrawLine(px, 0, px, _field.Size * _cellSize, linePaint);
+            Profiler.Mark("DrawGridX");
         }
 
-        for (var x = xStart; x <= xEnd; x++)
+        if (_field.FlagX >= 0 && _field.FlagY >= 0)
         {
-            var px = x * cellSize;
-            canvas.DrawLine(px, yStart * cellSize, px, yEnd * cellSize, linePaint);
+            using var flagPaint = new SKPaint();
+            flagPaint.Style = SKPaintStyle.Fill;
+            flagPaint.Color = SKColors.Blue;
+            flagPaint.IsAntialias = false;
+            var rect = new SKRect(
+                _field.FlagX * _cellSize,
+                _field.FlagY * _cellSize,
+                (_field.FlagX + 1) * _cellSize,
+                (_field.FlagY + 1) * _cellSize
+            );
+            canvas.DrawRect(rect, flagPaint);
+        }
+
+        _gridImage?.Dispose();
+        _gridImage = surface.Snapshot();
+    }
+
+    public void Draw(SKCanvas canvas)
+    {
+        if (_gridImage != null)
+        {
+            canvas.DrawImage(_gridImage, 0, 0);
         }
     }
 }

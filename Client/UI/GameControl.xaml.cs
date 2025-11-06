@@ -22,7 +22,7 @@ public partial class GameControl
 
         _turtle = new Turtle(field);
         _fieldRenderer = new FieldRenderer(field, _turtle, _transform, 1, 1);
-        _fieldRenderer.RebuildMinesLayer(); // пересобираем слой мин сразу после генерации
+        _fieldRenderer.RebuildMinesLayer();
 
         CompositionTarget.Rendering += GameLoop;
 
@@ -68,7 +68,7 @@ public partial class GameControl
         var canvas = e.Surface.Canvas;
         canvas.Clear(SKColors.Gray);
 
-        _fieldRenderer.Render(canvas, (float)GameSurface.ActualWidth, (float)GameSurface.ActualHeight);
+        _fieldRenderer.Render(canvas);
     }
 
     private void OnKeyDown(object sender, KeyEventArgs e)

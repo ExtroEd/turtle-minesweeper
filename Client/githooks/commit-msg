@@ -1,2 +1,0 @@
-#!/bin/sh
-pwsh -File "$(dirname "$0")/commit-msg.ps1" "$1"

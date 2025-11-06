@@ -17,19 +17,23 @@ public partial class MainWindow
         try
         {
             var exePath = AppContext.BaseDirectory;
-    
+            
             var clientDir = Path.GetFullPath(Path.Combine(exePath, "..", "..", ".."));
-    
+            
             var versionPath = Path.Combine(clientDir, "version.txt");
 
             var version = File.ReadAllText(versionPath).Trim();
-            VersionText.Text = $"Alpha {version}";
+            VersionText.Text = version;
         }
-        catch
+        catch (IOException)
         {
             VersionText.Text = "Version not found";
         }
-
+        catch (UnauthorizedAccessException)
+        {
+            VersionText.Text = "Version not found";
+        }
+        
         SwitchContent(new MainMenuControl());
     }
 
