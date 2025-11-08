@@ -48,9 +48,4 @@ public class FieldRenderer
         _transform.OffsetX = canvasWidth / 2f - _turtle.X * _cellSize * _transform.Scale;
         _transform.OffsetY = canvasHeight / 2f - _turtle.Y * _cellSize * _transform.Scale;
     }
-    
-    public void RebuildMinesLayer()
-    {
-        _gridRenderer.RebuildGridLayer();
-    }
 }

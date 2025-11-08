@@ -22,7 +22,6 @@ public partial class GameControl
 
         _turtle = new Turtle(field);
         _fieldRenderer = new FieldRenderer(field, _turtle, _transform, 1, 1);
-        _fieldRenderer.RebuildMinesLayer();
 
         CompositionTarget.Rendering += GameLoop;
 

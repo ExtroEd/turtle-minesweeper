@@ -24,17 +24,16 @@ public class FieldGridRenderer
         RebuildGridLayer();
     }
 
-    public void RebuildGridLayer()
+    private void RebuildGridLayer()
     {
         _minesRenderer.RebuildMinesLayer();
 
-        int width = (int)(_field.Size * _cellSize);
-        int height = (int)(_field.Size * _cellSize);
+        var width = (int)(_field.Size * _cellSize);
+        var height = (int)(_field.Size * _cellSize);
         var info = new SKImageInfo(width, height);
 
         using var surface = SKSurface.Create(info);
         var canvas = surface.Canvas;
-        canvas.Clear(SKColors.White);
 
         _minesRenderer.Draw(canvas, _transform);
 
@@ -43,32 +42,19 @@ public class FieldGridRenderer
         linePaint.Color = SKColors.Black;
         linePaint.IsAntialias = false;
         linePaint.StrokeWidth = 1;
-        for (int y = 0; y <= _field.Size; y++)
+
+        for (var y = 0; y <= _field.Size; y++)
         {
-            float py = y * _cellSize;
+            var py = y * _cellSize;
             canvas.DrawLine(0, py, _field.Size * _cellSize, py, linePaint);
             Profiler.Mark("DrawGridY");
         }
-        for (int x = 0; x <= _field.Size; x++)
+
+        for (var x = 0; x <= _field.Size; x++)
         {
-            float px = x * _cellSize;
+            var px = x * _cellSize;
             canvas.DrawLine(px, 0, px, _field.Size * _cellSize, linePaint);
             Profiler.Mark("DrawGridX");
-        }
-
-        if (_field.FlagX >= 0 && _field.FlagY >= 0)
-        {
-            using var flagPaint = new SKPaint();
-            flagPaint.Style = SKPaintStyle.Fill;
-            flagPaint.Color = SKColors.Blue;
-            flagPaint.IsAntialias = false;
-            var rect = new SKRect(
-                _field.FlagX * _cellSize,
-                _field.FlagY * _cellSize,
-                (_field.FlagX + 1) * _cellSize,
-                (_field.FlagY + 1) * _cellSize
-            );
-            canvas.DrawRect(rect, flagPaint);
         }
 
         _gridImage?.Dispose();

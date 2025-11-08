@@ -7,56 +7,60 @@ public class MinesRenderer
 {
     private readonly Field _field;
     private readonly float _cellSize;
-    private readonly Dictionary<int, SKImage> _lodCache = new();
-    private const int LodCount = 10;
+    private SKImage? _bakedMines;
 
     public MinesRenderer(Field field, float cellSize)
     {
         _field = field ?? throw new ArgumentNullException(nameof(field));
         _cellSize = cellSize;
-
-        BuildLoDs();
+        _bakedMines = BakeMines();
     }
 
-    private void BuildLoDs()
+    private SKImage BakeMines()
     {
-        for (int i = 0; i < LodCount; i++)
-        {
-            float scale = 1f + i * 0.1f;
-            _lodCache[i] = BakeLayer(scale);
-            Profiler.Mark("BakeRedRect");
-        }
-    }
-
-    private SKImage BakeLayer(float scale)
-    {
-        int width = (int)(_field.Size * _cellSize * scale);
-        int height = (int)(_field.Size * _cellSize * scale);
+        var width = (int)(_field.Size * _cellSize);
+        var height = (int)(_field.Size * _cellSize);
         var info = new SKImageInfo(width, height);
         using var surface = SKSurface.Create(info);
         var canvas = surface.Canvas;
-        canvas.Clear(SKColors.Transparent);
+        canvas.Clear(SKColors.White);
 
-        using var paint = new SKPaint();
-        paint.Style = SKPaintStyle.Fill;
-        paint.Color = SKColors.Red;
-        paint.IsAntialias = false;
-
-        for (int y = 0; y < _field.Size; y++)
+        using (var minePaint = new SKPaint())
         {
-            for (int x = 0; x < _field.Size; x++)
+            minePaint.Style = SKPaintStyle.Fill;
+            minePaint.Color = SKColors.Red;
+            minePaint.IsAntialias = false;
+            for (var y = 0; y < _field.Size; y++)
             {
-                if (!_field.IsMine(x, y)) continue;
+                for (var x = 0; x < _field.Size; x++)
+                {
+                    if (!_field.IsMine(x, y)) continue;
 
-                var rect = new SKRect(
-                    x * _cellSize * scale,
-                    y * _cellSize * scale,
-                    (x + 1) * _cellSize * scale,
-                    (y + 1) * _cellSize * scale
-                );
-                canvas.DrawRect(rect, paint);
-                Profiler.Mark("DrawRedRect");
+                    var rect = new SKRect(
+                        x * _cellSize,
+                        y * _cellSize,
+                        (x + 1) * _cellSize,
+                        (y + 1) * _cellSize
+                    );
+                    canvas.DrawRect(rect, minePaint);
+                    Profiler.Mark("BakeRedRect");
+                }
             }
+        }
+
+        if (_field.FlagX < 0 || _field.FlagY < 0) return surface.Snapshot();
+        {
+            using var flagPaint = new SKPaint();
+            flagPaint.Style = SKPaintStyle.Fill;
+            flagPaint.Color = SKColors.Blue;
+            flagPaint.IsAntialias = false;
+            var rect = new SKRect(
+                _field.FlagX * _cellSize,
+                _field.FlagY * _cellSize,
+                (_field.FlagX + 1) * _cellSize,
+                (_field.FlagY + 1) * _cellSize
+            );
+            canvas.DrawRect(rect, flagPaint);
         }
 
         return surface.Snapshot();
@@ -64,17 +68,17 @@ public class MinesRenderer
 
     public void RebuildMinesLayer()
     {
-        _lodCache.Clear();
-        BuildLoDs();
+        _bakedMines?.Dispose();
+        _bakedMines = BakeMines();
     }
 
     public void Draw(SKCanvas canvas, TransformController transform)
     {
-        int lodIndex = Math.Clamp((int)((transform.Scale - 1f) / 0.1f), 0, LodCount - 1);
+        if (_bakedMines is null) return;
 
-        if (_lodCache.TryGetValue(lodIndex, out var image))
-        {
-            canvas.DrawImage(image, 0, 0);
-        }
+        canvas.Save();
+        canvas.Scale(transform.Scale);
+        canvas.DrawImage(_bakedMines, 0, 0);
+        canvas.Restore();
     }
 }
