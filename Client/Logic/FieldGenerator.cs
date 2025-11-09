@@ -86,7 +86,7 @@ public class FieldGenerator(Field field, Random random)
         for (var i = 0; i < numberOfMines && i < candidates.Count; i++)
         {
             var p = candidates[i];
-            field.PlaceMine(p.X, p.Y, i + 1);
+            field.PlaceMine(p.X, p.Y);
 
             if (i % (numberOfMines / 10 + 1) == 0)
                 progress?.Report($"Placed {i + 1}/{numberOfMines} mines...");

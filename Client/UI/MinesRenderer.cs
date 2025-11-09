@@ -1,6 +1,7 @@
 ﻿using Client.Logic;
 using SkiaSharp;
 
+
 namespace Client.UI;
 
 public class MinesRenderer

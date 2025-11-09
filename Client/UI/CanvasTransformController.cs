@@ -13,17 +13,27 @@ public class TransformController
     private SKPoint _lastMousePos;
 
     private const float CellSize = 20f;
+    
+    public SKMatrix Matrix
+    {
+        get
+        {
+            var matrix = SKMatrix.CreateIdentity();
+            matrix = SKMatrix.Concat(matrix, SKMatrix.CreateTranslation(OffsetX, OffsetY));
+            matrix = SKMatrix.Concat(matrix, SKMatrix.CreateScale(Scale, Scale));
+            return matrix;
+        }
+    }
 
     public void OnMouseWheel(float delta, float centerX, float centerY, float viewportWidth)
     {
         var zoomFactor = delta > 0 ? 1.1f : 0.9f;
         var newScale = Scale * zoomFactor;
 
-        var maxScale = viewportWidth / (CellSize * 10f);
-        var minScale = viewportWidth / (CellSize * 100f);
+        var maxScale = viewportWidth / (CellSize * 15f);
+        var minScale = viewportWidth / (CellSize * 500f);
 
-        if (newScale > maxScale) newScale = maxScale;
-        if (newScale < minScale) newScale = minScale;
+        newScale = Math.Clamp(newScale, minScale, maxScale);
 
         OffsetX = (OffsetX - centerX) * (newScale / Scale) + centerX;
         OffsetY = (OffsetY - centerY) * (newScale / Scale) + centerY;

@@ -15,7 +15,6 @@ public class AStarPathFinder(Field field)
     {
         var size = field.Size;
 
-        // gScores: best known cost to reach cell
         var gScores = new int[size, size];
         for (var yy = 0; yy < size; yy++)
         for (var xx = 0; xx < size; xx++)

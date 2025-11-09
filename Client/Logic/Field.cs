@@ -37,7 +37,7 @@ public class Field
         _grid[y, x] = '$';
     }
 
-    public void PlaceMine(int x, int y, int mineId)
+    public void PlaceMine(int x, int y)
     {
         if (!IsInBounds(x, y)) return;
         _grid[y, x] = '#';

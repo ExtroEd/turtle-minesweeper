@@ -19,7 +19,7 @@ public class BaseWindow : Window
 
     protected BaseWindow()
     {
-        Background = Brushes.White; // main background
+        Background = Brushes.White;
         _timer.Tick += Timer_Tick;
         _timer.Start();
             
@@ -34,7 +34,6 @@ public class BaseWindow : Window
         public const WindowStyle LastWindowStyle = WindowStyle.None;
     }
         
-    // initializing splash-text in heir
     protected void InitSplash(TextBlock title, TextBlock splash)
     {
         _titleText = title;

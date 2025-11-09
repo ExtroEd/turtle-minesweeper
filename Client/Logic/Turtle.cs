@@ -4,29 +4,19 @@ using Client.UI;
 
 namespace Client.Logic;
 
-public class Turtle
+public class Turtle(Field field)
 {
-    public int X { get; private set; }
-    public int Y { get; private set; }
-
-    private readonly Field _field;
+    public int X { get; private set; } = 0;
+    public int Y { get; private set; } = 0;
 
     public bool IsVisible { get; private set; } = true;
-
-    public Turtle(Field field)
-    {
-        _field = field;
-
-        X = 0;
-        Y = 0;
-    }
 
     private void TryMove(int dx, int dy)
     {
         var newX = X + dx;
         var newY = Y + dy;
 
-        if (newX < 0 || newY < 0 || newX >= _field.Size || newY >= _field.Size)
+        if (newX < 0 || newY < 0 || newX >= field.Size || newY >= field.Size)
         {
             EnemyManager.Instance.StopAll();
             ShowEndWindow("You fell off the map! 💀");
@@ -36,14 +26,14 @@ public class Turtle
         X = newX;
         Y = newY;
 
-        if (_field.IsMine(X, Y))
+        if (field.IsMine(X, Y))
         {
             EnemyManager.Instance.StopAll();
             ShowEndWindow("You stepped on a mine! 💥");
             return;
         }
 
-        if (X != _field.FlagX || Y != _field.FlagY) return;
+        if (X != field.FlagX || Y != field.FlagY) return;
         EnemyManager.Instance.StopAll();
         ShowEndWindow("You reached the flag! 🏁");
     }
