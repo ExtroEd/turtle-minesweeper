@@ -28,7 +28,7 @@ public class DynamicObjectsRenderer(
             DrawIfVisible(turtle.X, turtle.Y, SKColors.Green);
 
         if (_fox != null)
-            DrawIfVisible(_fox.X, _fox.Y, SKColors.OrangeRed);
+            DrawIfVisible(_fox.RenderX, _fox.RenderY, SKColors.OrangeRed);
         return;
 
         void DrawIfVisible(float objX, float objY, SKColor color)

@@ -6,9 +6,8 @@ namespace Client.Logic;
 
 public class Turtle(Field field)
 {
-    public int X { get; private set; } = 0;
-    public int Y { get; private set; } = 0;
-
+    public int X { get; private set; }
+    public int Y { get; private set; }
     public bool IsVisible { get; private set; } = true;
 
     private void TryMove(int dx, int dy)
@@ -33,6 +32,8 @@ public class Turtle(Field field)
             return;
         }
 
+        CheckEnemyCollision();
+
         if (X != field.FlagX || Y != field.FlagY) return;
         EnemyManager.Instance.StopAll();
         ShowEndWindow("You reached the flag! 🏁");
@@ -43,18 +44,39 @@ public class Turtle(Field field)
     public void MoveLeft() => TryMove(-1, 0);
     public void MoveRight() => TryMove(1, 0);
 
-    public void TogglePen()
+    public void SetVisible(bool visible)
     {
-        IsVisible = !IsVisible;
+        IsVisible = visible;
+    }
+
+    private void CheckEnemyCollision()
+    {
+        if (!IsVisible) return;
+
+        foreach (var enemy in EnemyManager.Instance.Enemies)
+        {
+            if (!enemy.IsActive) continue;
+
+            if (X != enemy.X || Y != enemy.Y) continue;
+            EnemyManager.Instance.StopAll();
+            ShowEndWindow(enemy.Name switch
+            {
+                "Fox" => "You were eaten by the fox! 🦊",
+                "Eagle" => "You were snatched by the eagle! 🦅",
+                "Crab" => "You were pinched by the crab! 🦀",
+                _ => "You died!"
+            });
+            return;
+        }
     }
 
     private static void ShowEndWindow(string text)
     {
-        Application.Current.Dispatcher.Invoke((Action)(() =>
+        Application.Current.Dispatcher.Invoke(() =>
         {
             if (Application.Current.MainWindow is not MainWindow main) return;
             EnemyManager.Instance.StopAll();
             main.SwitchContent(new EndWindowControl(text));
-        }));
+        });
     }
 }

@@ -46,7 +46,14 @@ public class AStarPathFinder(Field field)
                 if (!field.IsInBounds(nx, ny) || closed[ny, nx] || field.IsMine(nx, ny))
                     continue;
 
-                var tentativeG = current.G + 1;
+                if (dx != 0 && dy != 0)
+                {
+                    if (field.IsMine(current.X + dx, current.Y) || field.IsMine(current.X, current.Y + dy))
+                        continue;
+                }
+                
+                var stepCost = (dx != 0 && dy != 0) ? 14 : 10;
+                var tentativeG = current.G + stepCost;
                 if (tentativeG >= gScores[ny, nx]) 
                     continue;
 
@@ -60,11 +67,18 @@ public class AStarPathFinder(Field field)
         return [];
     }
 
-    private static int Heuristic(int x, int y, int goalX, int goalY) =>
-        Math.Abs(goalX - x) + Math.Abs(goalY - y);
-
+    private static int Heuristic(int x, int y, int goalX, int goalY)
+    {
+        var dx = Math.Abs(goalX - x);
+        var dy = Math.Abs(goalY - y);
+        return 10 * (dx + dy) + (14 - 2 * 10) * Math.Min(dx, dy);
+    }
+    
     private static (int dx, int dy)[] Directions() =>
-        [(1, 0), (-1, 0), (0, 1), (0, -1)];
+    [
+        (1, 0), (-1, 0), (0, 1), (0, -1),
+        (1, 1), (1, -1), (-1, 1), (-1, -1)
+    ];
 
     private static List<(int x, int y)> ReconstructPath(Node node)
     {

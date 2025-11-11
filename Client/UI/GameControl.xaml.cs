@@ -82,7 +82,6 @@ public partial class GameControl
             case Key.A: _turtle.MoveLeft(); break;
             case Key.Right:
             case Key.D: _turtle.MoveRight(); break;
-            case Key.E: _turtle.TogglePen(); break;
         }
         GameSurface.InvalidateVisual();
     }

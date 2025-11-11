@@ -9,18 +9,19 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
 {
     public int X { get; private set; } = startX;
     public int Y { get; private set; } = startY;
+    public float RenderX { get; private set; } = startX;
+    public float RenderY { get; private set; } = startY;
+    public bool IsActive { get; private set; } = true;
+    public string Name => "Fox";
 
     private readonly AStarPathFinder _pathfinder = new(field);
     private List<(int x, int y)> _path = [];
     private int _pathIndex;
-
-    private readonly int _speed = Math.Clamp(speed, 1, 10);
+    private readonly float _speed = Math.Clamp(speed, 1, 10);
     private DateTime _lastMoveTime = DateTime.MinValue;
 
     private int _lastTargetX = int.MinValue;
     private int _lastTargetY = int.MinValue;
-
-    private bool _isActive = true;
 
     private bool TargetChanged(int tx, int ty)
     {
@@ -32,19 +33,19 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
 
     public void Update()
     {
-        if (!_isActive) return;
+        if (!IsActive) return;
 
-        var msPerStep = 1000.0 / _speed;
-        if ((DateTime.Now - _lastMoveTime).TotalMilliseconds < msPerStep) return;
-        _lastMoveTime = DateTime.Now;
+        Profiler.Mark("Fox.Update");
 
-        if (!turtle.IsVisible)
-            return;
+        var now = DateTime.Now;
+        var deltaMs = (now - _lastMoveTime).TotalMilliseconds;
+        _lastMoveTime = now;
 
         var tx = turtle.X;
         var ty = turtle.Y;
+        var turtleVisible = turtle.IsVisible;
 
-        if (TargetChanged(tx, ty) || _pathIndex >= _path.Count)
+        if ((turtleVisible && TargetChanged(tx, ty)) || _pathIndex >= _path.Count)
         {
             _path = _pathfinder.FindPath(X, Y, tx, ty);
             _pathIndex = 0;
@@ -52,34 +53,71 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
 
         if (_path.Count == 0) return;
 
-        if (_pathIndex < _path.Count && _path[_pathIndex].x == X && _path[_pathIndex].y == Y)
-            _pathIndex++;
+        int targetX, targetY;
 
-        if (_pathIndex < _path.Count)
+        if (!turtleVisible)
+        {
+            if (_pathIndex < _path.Count)
+            {
+                var next = _path[_pathIndex];
+                targetX = next.x;
+                targetY = next.y;
+            }
+            else
+            {
+                targetX = (int)MathF.Round(RenderX);
+                targetY = (int)MathF.Round(RenderY);
+            }
+        }
+        else
         {
             var next = _path[_pathIndex];
-            X = next.x;
-            Y = next.y;
-            _pathIndex++;
+            targetX = next.x;
+            targetY = next.y;
         }
 
-        if (turtle.IsVisible && X == turtle.X && Y == turtle.Y)
+        var dx = targetX - RenderX;
+        var dy = targetY - RenderY;
+        var dist = MathF.Sqrt(dx * dx + dy * dy);
+
+        if (dist > 0f)
         {
-            Application.Current.Dispatcher.Invoke((Action)(() =>
+            var step = (float)(deltaMs / 1000.0 * _speed);
+
+            if (step >= dist)
             {
-                EnemyManager.Instance.StopAll();
+                RenderX = targetX;
+                RenderY = targetY;
+                X = targetX;
+                Y = targetY;
 
-                if (Application.Current.MainWindow is MainWindow main)
-                {
-                    main.SwitchContent(new EndWindowControl("You were eaten by the fox! 🦊"));
-                }
-            }));
+                if (turtleVisible && _pathIndex < _path.Count)
+                    _pathIndex++;
+            }
+            else
+            {
+                RenderX += dx / dist * step;
+                RenderY += dy / dist * step;
+            }
         }
-    }
 
+        if (!turtleVisible) return;
+        var dxT = turtle.X - RenderX;
+        var dyT = turtle.Y - RenderY;
+        var distToTurtle = MathF.Sqrt(dxT * dxT + dyT * dyT);
+
+        if (!(distToTurtle < 0.8f)) return;
+        EnemyManager.Instance.StopAll();
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            if (Application.Current.MainWindow is MainWindow main)
+                main.SwitchContent(new EndWindowControl("You were eaten by the fox! 🦊"));
+        });
+    }
+    
     public void Stop()
     {
+        IsActive = false;
         _path.Clear();
-        _isActive = false;
     }
 }

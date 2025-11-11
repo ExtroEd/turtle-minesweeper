@@ -12,8 +12,7 @@ public static class Profiler
     private static readonly Stopwatch Stopwatch = Stopwatch.StartNew();
 
     private static double _lastUpdateTime;
-    private const double UpdateInterval = 1.0;
-    private const double AveragingTime = 5.0;
+    private const double UpdateInterval = 5.0;
 
     private static readonly Timer PrintTimer;
 
@@ -40,8 +39,6 @@ public static class Profiler
         foreach (var pair in Counters)
         {
             var rate = pair.Value / deltaTime;
-            if (Rates.TryGetValue(pair.Key, out var oldRate))
-                rate = (oldRate * (AveragingTime - deltaTime) + rate * deltaTime) / AveragingTime;
 
             Rates[pair.Key] = rate;
             Counters[pair.Key] = 0;
@@ -55,7 +52,7 @@ public static class Profiler
         Update();
 
         return "[Profiler avg 5s] " + string.Join(" | ",
-            Rates.OrderByDescending(p => p.Value)
+            Rates.OrderBy(p => p.Key)
                 .Select(p => $"{p.Key}: {p.Value:F1}/s"));
     }
 

@@ -66,7 +66,7 @@ public class FieldGridRenderer : IDisposable
         var screenCellSize = _cellSize * _transform.Scale;
         var visibleCellsInWidth = (int)(canvas.DeviceClipBounds.Width / screenCellSize);
 
-        const int maxCellsForGrid = 200;
+        const int maxCellsForGrid = 150;
 
         canvas.Save();
         canvas.SetMatrix(_transform.Matrix);

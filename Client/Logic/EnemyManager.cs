@@ -7,6 +7,8 @@ public class EnemyManager
 
     private readonly List<IEnemy> _enemies = [];
 
+    public IReadOnlyList<IEnemy> Enemies => _enemies;
+
     private EnemyManager() {}
 
     public void AddEnemy(IEnemy enemy) => _enemies.Add(enemy);
