@@ -34,8 +34,7 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
     public void Update()
     {
         if (!IsActive) return;
-
-        Profiler.Mark("Fox.Update");
+        // Profiler.Mark("Fox.Update");
 
         var now = DateTime.Now;
         var deltaMs = (now - _lastMoveTime).TotalMilliseconds;

@@ -38,8 +38,7 @@ public class FieldGridRenderer : IDisposable
 
     private void RebuildGridLayer()
     {
-        _minesRenderer.RebuildMinesLayer();
-
+        if (_minesImage != null) return;
         var width = (int)(_field.Size * _cellSize);
         var height = (int)(_field.Size * _cellSize);
         var info = new SKImageInfo(width, height);
@@ -49,7 +48,6 @@ public class FieldGridRenderer : IDisposable
 
         _minesRenderer.Draw(canvas, _transform);
 
-        _minesImage?.Dispose();
         _minesImage = surface.Snapshot();
     }
 

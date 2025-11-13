@@ -1,13 +1,25 @@
 ﻿using System.Windows;
+using Client.Logic;
 
 
 namespace Client.UI;
 
 public partial class SinglePlayerControl
 {
+    private readonly SinglePlayerSettings _settings;
+    
     public SinglePlayerControl()
     {
         InitializeComponent();
+
+        _settings = SinglePlayerSettings.Load();
+
+        GridSizeTextBox.Text = _settings.GridSize.ToString();
+        MinePercentTextBox.Text = _settings.MinePercent.ToString();
+        EnableFoxCheckBox.IsChecked = _settings.EnableFox;
+        FoxSpeedTextBox.Text = _settings.FoxSpeed.ToString();
+
+        FoxSpeedPanel.Visibility = _settings.EnableFox ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void EnableFoxCheckBox_Checked(object sender, RoutedEventArgs e) 
@@ -40,6 +52,13 @@ public partial class SinglePlayerControl
             }
         }
 
+        _settings.GridSize = gridSize;
+        _settings.MinePercent = minePercent;
+        _settings.EnableFox = EnableFoxCheckBox.IsChecked == true;
+        _settings.FoxSpeed = foxSpeed;
+
+        _settings.Save();
+        
         var loadingControl = new LoadingControl(gridSize, minePercent, foxSpeed);
 
         if (Application.Current.MainWindow is MainWindow main)
