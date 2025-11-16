@@ -14,21 +14,18 @@ public class AStarPathFinder(Field field)
     public List<(int x, int y)> FindPath(int startX, int startY, int goalX, int goalY)
     {
         var size = field.Size;
-
         var gScores = new int[size, size];
-        for (var yy = 0; yy < size; yy++)
-        for (var xx = 0; xx < size; xx++)
-            gScores[yy, xx] = int.MaxValue;
+        for (var y = 0; y < size; y++)
+            for (var x = 0; x < size; x++)
+                gScores[y, x] = int.MaxValue;
 
         var closed = new bool[size, size];
         var open = new PriorityQueue<Node, int>();
-        
-        var h0 = Heuristic(startX, startY, goalX, goalY);
-        var start = new Node(startX, startY, null, 0, h0);
-        
+
+        var startNode = new Node(startX, startY, null, 0, Heuristic(startX, startY, goalX, goalY));
         gScores[startY, startX] = 0;
-        open.Enqueue(start, start.F);
-        
+        open.Enqueue(startNode, startNode.F);
+
         while (open.Count > 0)
         {
             var current = open.Dequeue();
@@ -43,23 +40,16 @@ public class AStarPathFinder(Field field)
                 var nx = current.X + dx;
                 var ny = current.Y + dy;
 
-                if (!field.IsInBounds(nx, ny) || closed[ny, nx] || field.IsMine(nx, ny))
+                if (!IsValid(nx, ny, current, dx, dy, closed))
                     continue;
 
-                if (dx != 0 && dy != 0)
-                {
-                    if (field.IsMine(current.X + dx, current.Y) || field.IsMine(current.X, current.Y + dy))
-                        continue;
-                }
-                
                 var stepCost = (dx != 0 && dy != 0) ? 14 : 10;
                 var tentativeG = current.G + stepCost;
-                if (tentativeG >= gScores[ny, nx]) 
+                if (tentativeG >= gScores[ny, nx])
                     continue;
 
                 gScores[ny, nx] = tentativeG;
-                var h = Heuristic(nx, ny, goalX, goalY);
-                var neighbor = new Node(nx, ny, current, tentativeG, h);
+                var neighbor = new Node(nx, ny, current, tentativeG, Heuristic(nx, ny, goalX, goalY));
                 open.Enqueue(neighbor, neighbor.F);
             }
         }
@@ -67,13 +57,24 @@ public class AStarPathFinder(Field field)
         return [];
     }
 
+    private bool IsValid(int x, int y, Node current, int dx, int dy, bool[,] closed)
+    {
+        if (!field.IsInBounds(x, y) || closed[y, x] || IsBlocked(x, y))
+            return false;
+
+        if (dx == 0 || dy == 0) return true;
+        return !IsBlocked(current.X + dx, current.Y) && !IsBlocked(current.X, current.Y + dy);
+    }
+
+    private bool IsBlocked(int x, int y) => field.IsMine(x, y) || field.IsWall(x, y);
+
     private static int Heuristic(int x, int y, int goalX, int goalY)
     {
         var dx = Math.Abs(goalX - x);
         var dy = Math.Abs(goalY - y);
         return 10 * (dx + dy) + (14 - 2 * 10) * Math.Min(dx, dy);
     }
-    
+
     private static (int dx, int dy)[] Directions() =>
     [
         (1, 0), (-1, 0), (0, 1), (0, -1),

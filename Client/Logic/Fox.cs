@@ -4,8 +4,7 @@ using Client.UI;
 
 namespace Client.Logic;
 
-public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
-    : IEnemy
+public class Fox(int startX, int startY, Field field, Turtle turtle, int speed) : IEnemy
 {
     public int X { get; private set; } = startX;
     public int Y { get; private set; } = startY;
@@ -34,7 +33,6 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
     public void Update()
     {
         if (!IsActive) return;
-        // Profiler.Mark("Fox.Update");
 
         var now = DateTime.Now;
         var deltaMs = (now - _lastMoveTime).TotalMilliseconds;
@@ -42,9 +40,8 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
 
         var tx = turtle.X;
         var ty = turtle.Y;
-        var turtleVisible = turtle.IsVisible;
 
-        if ((turtleVisible && TargetChanged(tx, ty)) || _pathIndex >= _path.Count)
+        if (TargetChanged(tx, ty) || _pathIndex >= _path.Count)
         {
             _path = _pathfinder.FindPath(X, Y, tx, ty);
             _pathIndex = 0;
@@ -52,28 +49,7 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
 
         if (_path.Count == 0) return;
 
-        int targetX, targetY;
-
-        if (!turtleVisible)
-        {
-            if (_pathIndex < _path.Count)
-            {
-                var next = _path[_pathIndex];
-                targetX = next.x;
-                targetY = next.y;
-            }
-            else
-            {
-                targetX = (int)MathF.Round(RenderX);
-                targetY = (int)MathF.Round(RenderY);
-            }
-        }
-        else
-        {
-            var next = _path[_pathIndex];
-            targetX = next.x;
-            targetY = next.y;
-        }
+        var (targetX, targetY) = _pathIndex < _path.Count ? _path[_pathIndex] : (x: (int)MathF.Round(RenderX), y: (int)MathF.Round(RenderY));
 
         var dx = targetX - RenderX;
         var dy = targetY - RenderY;
@@ -90,7 +66,7 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
                 X = targetX;
                 Y = targetY;
 
-                if (turtleVisible && _pathIndex < _path.Count)
+                if (_pathIndex < _path.Count)
                     _pathIndex++;
             }
             else
@@ -100,7 +76,6 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
             }
         }
 
-        if (!turtleVisible) return;
         var dxT = turtle.X - RenderX;
         var dyT = turtle.Y - RenderY;
         var distToTurtle = MathF.Sqrt(dxT * dxT + dyT * dyT);
@@ -113,7 +88,7 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed)
                 main.SwitchContent(new EndWindowControl("You were eaten by the fox! 🦊"));
         });
     }
-    
+
     public void Stop()
     {
         IsActive = false;

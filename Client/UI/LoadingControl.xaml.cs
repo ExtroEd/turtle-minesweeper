@@ -8,13 +8,15 @@ public partial class LoadingControl
 {
     private readonly int _gridSize;
     private readonly int _minePercent;
+    private readonly int _wallPercent;
     private readonly int _foxSpeed;
 
-    public LoadingControl(int gridSize, int minePercent, int foxSpeed)
+    public LoadingControl(int gridSize, int minePercent, int wallPercent, int foxSpeed)
     {
         InitializeComponent();
         _gridSize = gridSize;
         _minePercent = minePercent;
+        _wallPercent = wallPercent;
         _foxSpeed = foxSpeed;
 
         Loaded += OnLoaded;
@@ -39,13 +41,18 @@ public partial class LoadingControl
                 });
             });
 
-            await Task.Run(() => generator.Generate(_minePercent, progress));
+            await Task.Run(() => generator.Generate(_minePercent, _wallPercent, progress));
 
             Dispatcher.Invoke(() =>
             {
                 if (Application.Current.MainWindow is MainWindow main)
                 {
-                    main.SwitchContent(new GameControl(_gridSize, _minePercent, _foxSpeed));
+                    main.SwitchContent(new GameControl(
+                        _gridSize,
+                        _minePercent,
+                        _wallPercent,
+                        _foxSpeed
+                    ));
                 }
             });
         }

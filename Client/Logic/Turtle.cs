@@ -6,26 +6,32 @@ namespace Client.Logic;
 
 public class Turtle(Field field)
 {
+    private readonly Field _field = field ?? throw new ArgumentNullException(nameof(field));
+
     public int X { get; private set; }
     public int Y { get; private set; }
-    public bool IsVisible { get; private set; } = true;
 
     private void TryMove(int dx, int dy)
     {
         var newX = X + dx;
         var newY = Y + dy;
 
-        if (newX < 0 || newY < 0 || newX >= field.Size || newY >= field.Size)
+        if (newX < 0 || newY < 0 || newX >= _field.Size || newY >= _field.Size)
         {
             EnemyManager.Instance.StopAll();
             ShowEndWindow("You fell off the map! 💀");
             return;
         }
 
+        if (_field.IsWall(newX, newY))
+        {
+            return;
+        }
+
         X = newX;
         Y = newY;
 
-        if (field.IsMine(X, Y))
+        if (_field.IsMine(X, Y))
         {
             EnemyManager.Instance.StopAll();
             ShowEndWindow("You stepped on a mine! 💥");
@@ -34,7 +40,7 @@ public class Turtle(Field field)
 
         CheckEnemyCollision();
 
-        if (X != field.FlagX || Y != field.FlagY) return;
+        if (X != _field.FlagX || Y != _field.FlagY) return;
         EnemyManager.Instance.StopAll();
         ShowEndWindow("You reached the flag! 🏁");
     }
@@ -44,15 +50,8 @@ public class Turtle(Field field)
     public void MoveLeft() => TryMove(-1, 0);
     public void MoveRight() => TryMove(1, 0);
 
-    public void SetVisible(bool visible)
-    {
-        IsVisible = visible;
-    }
-
     private void CheckEnemyCollision()
     {
-        if (!IsVisible) return;
-
         foreach (var enemy in EnemyManager.Instance.Enemies)
         {
             if (!enemy.IsActive) continue;

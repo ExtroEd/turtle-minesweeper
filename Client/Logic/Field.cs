@@ -44,10 +44,18 @@ public class Field
         _hasMine[y, x] = true;
     }
 
+    public void PlaceWall(int x, int y)
+    {
+        if (!IsInBounds(x, y)) return;
+        _grid[y, x] = 'W';
+    }
+
     public bool IsMine(int x, int y)
     {
         return IsInBounds(x, y) && _hasMine[y, x];
     }
+
+    public bool IsWall(int x, int y) => IsInBounds(x, y) && _grid[y, x] == 'W';
 
     public bool IsOutOfBounds(int x, int y)
     {

@@ -24,8 +24,7 @@ public class DynamicObjectsRenderer(
         var rightVisible = (-transform.OffsetX + canvas.DeviceClipBounds.Width - padding) / transform.Scale;
         var bottomVisible = (-transform.OffsetY + canvas.DeviceClipBounds.Height - padding) / transform.Scale;
 
-        if (turtle.IsVisible)
-            DrawIfVisible(turtle.X, turtle.Y, SKColors.Green);
+        DrawIfVisible(turtle.X, turtle.Y, SKColors.Green);
 
         if (_fox != null)
             DrawIfVisible(_fox.RenderX, _fox.RenderY, SKColors.OrangeRed);

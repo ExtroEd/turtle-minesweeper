@@ -13,13 +13,14 @@ public partial class GameControl
     private readonly TransformController _transform = new();
     private readonly FieldRenderer _fieldRenderer;
 
-    public GameControl(int gridSize, int minePercent, int foxSpeed = 0)
+    public GameControl(int gridSize, int minePercent, int wallPercent, int foxSpeed = 0)
     {
         InitializeComponent();
 
         var field = new Field(gridSize);
-        new FieldGenerator(field, new Random()).Generate(minePercent);
-
+        new FieldGenerator(field, new Random())
+            .Generate(minePercent, wallPercent);
+        
         _turtle = new Turtle(field);
         _fieldRenderer = new FieldRenderer(field, _turtle, _transform, 1, 1);
 

@@ -8,6 +8,7 @@ public class SinglePlayerSettings
 {
     public int GridSize { get; set; } = 20;
     public int MinePercent { get; set; } = 10;
+    public int WallPercent { get; set; } = 20;
     public bool EnableFox { get; set; }
     public int FoxSpeed { get; set; } = 5;
 

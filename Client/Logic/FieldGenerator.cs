@@ -5,7 +5,7 @@ namespace Client.Logic;
 
 public class FieldGenerator(Field field, Random random)
 {
-    public void Generate(int minePercentage, IProgress<string>? progress = null)
+    public void Generate(int minePercentage, int wallPercentage, IProgress<string>? progress = null)
     {
         progress?.Report("🔄 Field generation started...");
         field.Clear();
@@ -15,7 +15,10 @@ public class FieldGenerator(Field field, Random random)
 
         var size = field.Size;
         var reservedPercent = size < 20 ? 2.0 : 1.0;
-        var maxPathPercent = 100.0 - minePercentage - reservedPercent;
+
+        var obstaclePercentage = minePercentage + wallPercentage;
+
+        var maxPathPercent = 100.0 - obstaclePercentage - reservedPercent;
         var maxPathLength = (int)Math.Floor(size * size * (maxPathPercent / 100.0));
 
         List<Point> path;
@@ -38,32 +41,30 @@ public class FieldGenerator(Field field, Random random)
         foreach (var p in pathSet)
             field.MarkCell(p.X, p.Y, '.');
 
-        PlaceMinesExcludingPath(minePercentage, pathSet, progress);
+        PlaceObstacles(pathSet, minePercentage, wallPercentage, progress);
 
         progress?.Report("🏁 Generation complete.");
     }
     
-    private void PlaceFlagRandom(IProgress<string>? progress)
+    private void PlaceObstacles(
+        HashSet<Point> pathSet,
+        int minePercentage,
+        int wallPercentage,
+        IProgress<string>? progress)
     {
         var size = field.Size;
-        var onBottomBorder = random.Next(2) == 0;
+        var totalCells = size * size;
 
-        var x = onBottomBorder ? random.Next(size) : size - 1;
-        var y = onBottomBorder ? size - 1 : random.Next(size);
+        var totalObstacleCount = (int)(totalCells * ((minePercentage + wallPercentage) / 100.0));
+        var mineCount = (int)(totalObstacleCount * (minePercentage / (double)(minePercentage + wallPercentage)));
+        var wallCount = totalObstacleCount - mineCount;
 
-        if (x == 0 && y == 0) x = 1;
-        field.PlaceFlag(x, y);
+        progress?.Report(
+            $"Placing obstacles: total={totalObstacleCount}, mines={mineCount}, walls={wallCount}"
+        );
 
-        progress?.Report($"Flag placed at ({x},{y}).");
-    }
+        var candidates = new List<Point>(totalCells);
 
-    private void PlaceMinesExcludingPath(int minePercentage, HashSet<Point> pathSet, IProgress<string>? progress)
-    {
-        var size = field.Size;
-        var numberOfMines = (int)(size * size * (minePercentage / 100.0));
-        progress?.Report($"Placing {numberOfMines} mines...");
-
-        var candidates = new List<Point>(size * size);
         for (var y = 0; y < size; y++)
         {
             for (var x = 0; x < size; x++)
@@ -83,16 +84,38 @@ public class FieldGenerator(Field field, Random random)
             (candidates[i], candidates[j]) = (candidates[j], candidates[i]);
         }
 
-        for (var i = 0; i < numberOfMines && i < candidates.Count; i++)
+        for (var i = 0; i < totalObstacleCount && i < candidates.Count; i++)
         {
             var p = candidates[i];
-            field.PlaceMine(p.X, p.Y);
 
-            if (i % (numberOfMines / 10 + 1) == 0)
-                progress?.Report($"Placed {i + 1}/{numberOfMines} mines...");
+            if (i < mineCount)
+            {
+                field.PlaceMine(p.X, p.Y);
+            }
+            else
+            {
+                field.PlaceWall(p.X, p.Y);
+            }
+
+            if (i % (totalObstacleCount / 10 + 1) == 0)
+                progress?.Report($"Placed {i + 1}/{totalObstacleCount} obstacles...");
         }
 
-        progress?.Report("All mines placed.");
+        progress?.Report("All obstacles placed.");
+    }
+
+    private void PlaceFlagRandom(IProgress<string>? progress)
+    {
+        var size = field.Size;
+        var onBottomBorder = random.Next(2) == 0;
+
+        var x = onBottomBorder ? random.Next(size) : size - 1;
+        var y = onBottomBorder ? size - 1 : random.Next(size);
+
+        if (x == 0 && y == 0) x = 1;
+        field.PlaceFlag(x, y);
+
+        progress?.Report($"Flag placed at ({x},{y}).");
     }
 
     private List<Point> GenerateRandomPath(int startX, int startY, int endX, int endY)
