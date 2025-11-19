@@ -2,22 +2,36 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="320">
-
-            <!-- GRID SIZE -->
+        <!-- Левая колонка -->
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="320">
+            <!-- Размер карты -->
             <TextBlock Text="Grid Size (10–500)" Style="{StaticResource LabelTextStyle}"/>
-            <TextBox x:Name="GridSizeTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+            <TextBox x:Name="GridSizeTextBox" Style="{StaticResource InputTextBoxStyle}" TextChanged="GridSizeTextBox_OnTextChanged"/>
+            <Slider x:Name="GridSizeSlider"
+                    Minimum="10"
+                    Maximum="500"
+                    TickFrequency="1"
+                    IsSnapToTickEnabled="True"
+                    ValueChanged="GridSizeSlider_OnValueChanged"
+                    Margin="0,2,0,0"/>
 
-            <!-- TOTAL OBSTACLES -->
-            <TextBlock Text="Total Obstacles % (0–60)" Style="{StaticResource LabelTextStyle}" Margin="0,10,0,0"/>
-            <Slider x:Name="TotalObstacleSlider" Minimum="0" Maximum="60" ValueChanged="TotalObstacleSlider_OnValueChanged"/>
-            <TextBlock Text="0%" HorizontalAlignment="Center"/>
+            <!-- Общее количество препятствий (от 1 до 60%) -->
+            <TextBlock Text="Total Obstacles % (1–60)" Style="{StaticResource LabelTextStyle}" Margin="0,10,0,0"/>
+            <Slider x:Name="TotalObstacleSlider" 
+                    Minimum="1" 
+                    Maximum="60" 
+                    TickFrequency="1" 
+                    IsSnapToTickEnabled="True" 
+                    ValueChanged="TotalObstacleSlider_OnValueChanged"/>
+            <TextBlock HorizontalAlignment="Center"
+                       Text="{Binding ElementName=TotalObstacleSlider,
+                              Path=Value,
+                              StringFormat='{}{0:##0}%'}"
+                       Margin="0,2,0,0"/>
 
-            <!-- WALL / MINE SPLIT SECTION -->
-            <StackPanel x:Name="SplitPanel" Visibility="Collapsed" Margin="0,10,0,0">
-
-                <TextBlock Text="Wall / Mine distribution" Style="{StaticResource LabelTextStyle}" />
-
+            <!-- Walls / Mines всегда видны -->
+            <StackPanel x:Name="SplitPanel" Margin="0,10,0,0">
+                <TextBlock Text="Wall / Mine distribution" Style="{StaticResource LabelTextStyle}"/>
                 <Grid Margin="0,5,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*"/>
@@ -25,50 +39,51 @@
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- WALL VALUE -->
                     <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                         <TextBlock Text="Walls %" Style="{StaticResource LabelTextStyle}" />
-                        <TextBox x:Name="WallPercentTextBox"
-                                 Width="50"
-                                 TextChanged="WallPercentTextBox_OnTextChanged"
-                                 Style="{StaticResource InputTextBoxStyle}"/>
+                        <TextBox x:Name="WallPercentTextBox" Width="50" TextChanged="WallPercentTextBox_OnTextChanged" Style="{StaticResource InputTextBoxStyle}"/>
                     </StackPanel>
 
-                    <!-- SLIDER -->
                     <Slider x:Name="SplitSlider"
                             Grid.Column="1"
                             Minimum="0"
-                            Maximum="1"
+                            Maximum="60"
+                            TickFrequency="1" 
+                            IsSnapToTickEnabled="True" 
                             ValueChanged="SplitSlider_OnValueChanged"
                             Orientation="Vertical"
                             Height="80"
-                            VerticalAlignment="Center"/>
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"/>
 
-                    <!-- MINE VALUE -->
                     <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                         <TextBlock Text="Mines %" Style="{StaticResource LabelTextStyle}" />
-                        <TextBox x:Name="MinePercentTextBox"
-                                 Width="50"
-                                 TextChanged="MinePercentTextBox_OnTextChanged"
-                                 Style="{StaticResource InputTextBoxStyle}"/>
+                        <TextBox x:Name="MinePercentTextBox" Width="50" TextChanged="MinePercentTextBox_OnTextChanged" Style="{StaticResource InputTextBoxStyle}"/>
                     </StackPanel>
                 </Grid>
             </StackPanel>
 
-            <!-- ENABLE FOX -->
+            <!-- Включение лисы -->
             <CheckBox x:Name="EnableFoxCheckBox"
                       Content="Enable enemy fox"
                       Margin="0,10,0,5"
                       Checked="EnableFoxCheckBox_Checked"
                       Unchecked="EnableFoxCheckBox_Unchecked"/>
 
-            <!-- FOX SPEED -->
-            <StackPanel x:Name="FoxSpeedPanel" Visibility="Collapsed">
+            <!-- Скорость лисы -->
+            <StackPanel x:Name="FoxSpeedPanel" Margin="0,5,0,0">
                 <TextBlock Text="Fox Speed (1–10 squares/sec)" Style="{StaticResource LabelTextStyle}"/>
-                <TextBox x:Name="FoxSpeedTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                <TextBox x:Name="FoxSpeedTextBox" Style="{StaticResource InputTextBoxStyle}" TextChanged="FoxSpeedTextBox_OnTextChanged"/>
+                <Slider x:Name="FoxSpeedSlider"
+                        Minimum="1"
+                        Maximum="10"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"
+                        ValueChanged="FoxSpeedSlider_OnValueChanged"
+                        Margin="0,2,0,0"/>
             </StackPanel>
 
-            <!-- BUTTONS -->
+            <!-- Кнопки -->
             <Button Content="Start Game" Style="{StaticResource MainButtonStyle}" Click="StartGame_Click" Margin="0 15 0 0"/>
             <Button Content="Back" Style="{StaticResource RedButtonStyle}" Click="Back_Click" Margin="0 15 0 0"/>
         </StackPanel>
