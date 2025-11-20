@@ -14,7 +14,7 @@ public partial class MainMenuControl
     {
         if (Application.Current.MainWindow is MainWindow main)
         {
-            main.SwitchContent(new SinglePlayerControl());
+            main.SwitchContent(new SelectModControl());
         }
     }
 

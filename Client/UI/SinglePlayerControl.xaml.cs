@@ -11,7 +11,7 @@ public partial class SinglePlayerControl
 {
     private readonly SinglePlayerSettings _settings;
     private readonly Logic.SinglePlayerControl _control;
-    private readonly bool _isInitializing;
+    private bool _isInitializing;
     private bool _foxPanelVisible;
 
     public SinglePlayerControl()
@@ -27,15 +27,14 @@ public partial class SinglePlayerControl
 
         _isInitializing = false;
     }
-
     
     private void ApplySettingsToUI()
     {
         GridSizeTextBox.Text = _settings.GridSize.ToString();
         TotalObstacleSlider.Value = Math.Max(1, _settings.MinePercent + _settings.WallPercent);
 
-        MinePercentTextBox.Text = _settings.MinePercent.ToString();
-        WallPercentTextBox.Text = _settings.WallPercent.ToString();
+        MinePercentTextBlock.Text = _settings.MinePercent.ToString();
+        WallPercentTextBlock.Text = _settings.WallPercent.ToString();
 
         SplitSlider.Value = _settings.MinePercent;
 
@@ -104,36 +103,27 @@ public partial class SinglePlayerControl
     {
         if (_isInitializing) return;
 
-        // проверяем, что все элементы UI созданы
-        if (SplitSlider == null || MinePercentTextBox == null || WallPercentTextBox == null || SplitPanel == null)
+        if (SplitSlider == null || MinePercentTextBlock == null || WallPercentTextBlock == null || SplitPanel == null)
             return;
 
         _control.UpdateTotal((int)TotalObstacleSlider.Value, SplitSlider, 
-            MinePercentTextBox, WallPercentTextBox, SplitPanel);
+            MinePercentTextBlock, WallPercentTextBlock, SplitPanel);
     }
     
     private void SplitSlider_OnValueChanged(object? _, RoutedPropertyChangedEventArgs<double> __)
     {
         if (_isInitializing) return;
-        if (SplitSlider == null || MinePercentTextBox == null || WallPercentTextBox == null) return;
+        if (SplitSlider == null || MinePercentTextBlock == null || WallPercentTextBlock == null) return;
 
-        _control.UpdateSplit((int)TotalObstacleSlider.Value, SplitSlider, MinePercentTextBox, WallPercentTextBox);
-    }
+        var total = (int)TotalObstacleSlider.Value;
 
-    private void WallPercentTextBox_OnTextChanged(object? _, TextChangedEventArgs __)
-    {
-        if (_isInitializing) return;
-        if (SplitSlider == null || MinePercentTextBox == null || WallPercentTextBox == null) return;
+        var mines = (int)SplitSlider.Maximum - (int)SplitSlider.Value;
+        var walls = total - mines;
 
-        _control.UpdateWallsFromText((int)TotalObstacleSlider.Value, SplitSlider, MinePercentTextBox, WallPercentTextBox);
-    }
-
-    private void MinePercentTextBox_OnTextChanged(object? _, TextChangedEventArgs __)
-    {
-        if (_isInitializing) return;
-        if (SplitSlider == null || MinePercentTextBox == null || WallPercentTextBox == null) return;
-
-        _control.UpdateMinesFromText((int)TotalObstacleSlider.Value, SplitSlider, MinePercentTextBox, WallPercentTextBox);
+        MinePercentTextBlock.Text = mines.ToString();
+        WallPercentTextBlock.Text = walls.ToString();
+        
+        _control.UpdateSplit((int)TotalObstacleSlider.Value, SplitSlider, MinePercentTextBlock, WallPercentTextBlock);
     }
 
     private void GridSizeTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
@@ -160,9 +150,28 @@ public partial class SinglePlayerControl
         FoxSpeedTextBox.Text = FoxSpeedSlider.Value.ToString("0");
     }
     
+    private void RandomButton_Click(object sender, RoutedEventArgs e)
+    {
+        var rnd = new Random();
+
+        _settings.GridSize = rnd.Next(10, 501);
+
+        var totalPercent = rnd.Next(1, 81);
+        _settings.MinePercent = rnd.Next(0, totalPercent + 1);
+        _settings.WallPercent = totalPercent - _settings.MinePercent;
+
+        _settings.FoxSpeed = rnd.Next(1, 11);
+
+        _settings.EnableFox = rnd.Next(0, 2) == 1;
+
+        _isInitializing = true;
+        ApplySettingsToUI();
+        _isInitializing = false;
+    }
+
     private void StartGame_Click(object? sender, RoutedEventArgs e)
     {
-        if (!_control.TryValidateAll(GridSizeTextBox, MinePercentTextBox, WallPercentTextBox,
+        if (!_control.TryValidateAll(GridSizeTextBox, MinePercentTextBlock, WallPercentTextBlock,
                                    FoxSpeedTextBox, EnableFoxCheckBox.IsChecked == true))
             return;
 
@@ -178,6 +187,6 @@ public partial class SinglePlayerControl
     private void Back_Click(object? sender, RoutedEventArgs e)
     {
         if (Application.Current.MainWindow is MainWindow main)
-            main.SwitchContent(new MainMenuControl());
+            main.SwitchContent(new SelectModControl());
     }
 }

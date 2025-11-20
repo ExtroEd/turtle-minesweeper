@@ -1,22 +1,21 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
+
 namespace Client.Logic;
 
 public class SinglePlayerControl(SinglePlayerSettings settings)
 {
     private bool _internal;
 
-    public void UpdateTotal(int total, Slider splitSlider, TextBox minesBox, TextBox wallsBox, UIElement splitPanel)
+    public void UpdateTotal(int total, Slider splitSlider, TextBlock minesBlock, TextBlock wallsBlock, UIElement splitPanel)
     {
         if (_internal) return;
         _internal = true;
 
         total = Math.Max(1, total);
-        
         splitSlider.Maximum = total;
-
-        splitPanel.Visibility = Visibility.Visible; // всегда виден
+        splitPanel.Visibility = Visibility.Visible;
 
         if (splitSlider.Value > total)
             splitSlider.Value = total;
@@ -24,13 +23,16 @@ public class SinglePlayerControl(SinglePlayerSettings settings)
         var mines = (int)splitSlider.Value;
         var walls = total - mines;
 
-        minesBox.Text = mines.ToString();
-        wallsBox.Text = walls.ToString();
+        minesBlock.Text = mines.ToString();
+        wallsBlock.Text = walls.ToString();
+
+        settings.MinePercent = mines;
+        settings.WallPercent = walls;
 
         _internal = false;
     }
 
-    public void UpdateSplit(int total, Slider splitSlider, TextBox minesBox, TextBox wallsBox)
+    public void UpdateSplit(int total, Slider splitSlider, TextBlock minesBlock, TextBlock wallsBlock)
     {
         if (_internal) return;
         _internal = true;
@@ -44,45 +46,16 @@ public class SinglePlayerControl(SinglePlayerSettings settings)
 
         var walls = total - mines;
 
-        minesBox.Text = mines.ToString();
-        wallsBox.Text = walls.ToString();
+        minesBlock.Text = mines.ToString();
+        wallsBlock.Text = walls.ToString();
+
+        settings.MinePercent = mines;
+        settings.WallPercent = walls;
 
         _internal = false;
     }
 
-    public void UpdateWallsFromText(int total, Slider splitSlider, TextBox minesBox, TextBox wallsBox)
-    {
-        if (_internal) return;
-        if (!int.TryParse(wallsBox.Text, out var walls)) return;
-        if (walls < 0 || walls > total) return;
-
-        _internal = true;
-
-        var mines = total - walls;
-
-        minesBox.Text = mines.ToString();
-        splitSlider.Value = mines;
-
-        _internal = false;
-    }
-
-    public void UpdateMinesFromText(int total, Slider splitSlider, TextBox minesBox, TextBox wallsBox)
-    {
-        if (_internal) return;
-        if (!int.TryParse(minesBox.Text, out var mines)) return;
-        if (mines < 0 || mines > total) return;
-
-        _internal = true;
-
-        var walls = total - mines;
-
-        wallsBox.Text = walls.ToString();
-        splitSlider.Value = mines;
-
-        _internal = false;
-    }
-
-    public bool TryValidateAll(TextBox gridSizeBox, TextBox minesBox, TextBox wallsBox,
+    public bool TryValidateAll(TextBox gridSizeBox, TextBlock minesBlock, TextBlock wallsBlock,
                                TextBox foxSpeedBox, bool foxEnabled)
     {
         if (!int.TryParse(gridSizeBox.Text, out var grid) || grid < 10 || grid > 500)
@@ -91,8 +64,8 @@ public class SinglePlayerControl(SinglePlayerSettings settings)
             return false;
         }
 
-        if (!int.TryParse(minesBox.Text, out var mines)) return false;
-        if (!int.TryParse(wallsBox.Text, out var walls)) return false;
+        if (!int.TryParse(minesBlock.Text, out var mines)) return false;
+        if (!int.TryParse(wallsBlock.Text, out var walls)) return false;
 
         var foxSpeed = 0;
         if (foxEnabled)

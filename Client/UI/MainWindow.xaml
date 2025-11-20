@@ -5,12 +5,13 @@
                   Title="Turtle Minesweeper">
     
     <Grid>
-        <!-- Title and splash -->
-        <TextBlock Style="{StaticResource TitleTextStyle}" x:Name="TitleText"/>
-        <TextBlock Style="{StaticResource SplashTextStyle}" x:Name="SplashText"/>
-        <TextBlock Style="{StaticResource VersionTextStyle}" x:Name="VersionText"/>
+        <TextBlock Style="{StaticResource TitleTextStyle}" 
+                   x:Name="TitleText"/>
+        <TextBlock Style="{StaticResource SplashTextStyle}" 
+                   x:Name="SplashText"/>
+        <TextBlock Style="{StaticResource VersionTextStyle}" 
+                   x:Name="VersionText"/>
 
-        <!-- Containers for content -->
         <Grid x:Name="MainContainer"/>
     </Grid>
 </local:BaseWindow>

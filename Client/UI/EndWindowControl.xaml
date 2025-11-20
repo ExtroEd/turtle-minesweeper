@@ -2,7 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     
-    <Grid Background="White" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <Grid Background="White" 
+          HorizontalAlignment="Stretch" 
+          VerticalAlignment="Stretch">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
             <TextBlock x:Name="EndingText"
                        FontSize="40"
@@ -11,9 +13,18 @@
                        Text="Game Over"
                        Margin="0,0,0,50"/>
             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                <Button Content="Main Menu" Style="{StaticResource MainButtonStyle}" Click="MainMenu_Click" Margin="0,15,0,0"/>
-                <Button Content="Statistics" Style="{StaticResource MainButtonStyle}" Click="Statistics_Click" Margin="0,15,0,0"/>
-                <Button Content="Exit" Style="{StaticResource RedButtonStyle}" Click="Exit_Click" Margin="0,15,0,0"/>
+                <Button Content="Main Menu" 
+                        Style="{StaticResource MainButtonStyle}" 
+                        Click="MainMenu_Click" 
+                        Margin="0,15,0,0"/>
+                <Button Content="Statistics" 
+                        Style="{StaticResource MainButtonStyle}" 
+                        Click="Statistics_Click" 
+                        Margin="0,15,0,0"/>
+                <Button Content="Exit" 
+                        Style="{StaticResource RedButtonStyle}" 
+                        Click="Exit_Click" 
+                        Margin="0,15,0,0"/>
             </StackPanel>
         </StackPanel>
     </Grid>
