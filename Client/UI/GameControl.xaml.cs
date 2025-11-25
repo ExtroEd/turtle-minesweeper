@@ -1,4 +1,5 @@
-﻿using SkiaSharp.Views.Desktop;
+﻿using System.Diagnostics;
+using SkiaSharp.Views.Desktop;
 using System.Windows.Input;
 using System.Windows.Media;
 using Client.Logic;
@@ -13,14 +14,17 @@ public partial class GameControl
     private readonly TransformController _transform = new();
     private readonly FieldRenderer _fieldRenderer;
 
+    private readonly Stopwatch _renderStopwatch = new();
+    private double _lastRenderTime;
+    private const double TargetFrameSeconds = 1.0 / 60.0;
+
     public GameControl(int gridSize, int minePercent, int wallPercent, int foxSpeed = 0)
     {
         InitializeComponent();
 
         var field = new Field(gridSize);
-        new FieldGenerator(field, new Random())
-            .Generate(minePercent, wallPercent);
-        
+        new FieldGenerator(field, new Random()).Generate(minePercent, wallPercent);
+
         _turtle = new Turtle(field);
         _fieldRenderer = new FieldRenderer(field, _turtle, _transform, 1, 1);
 
@@ -46,6 +50,9 @@ public partial class GameControl
             GameSurface.MouseMove += GameSurface_MouseMove;
 
             GameSurface.SizeChanged += (_, _) => UpdateFieldRenderer();
+
+            _renderStopwatch.Start();
+            _lastRenderTime = _renderStopwatch.Elapsed.TotalSeconds;
         };
     }
 
@@ -59,16 +66,21 @@ public partial class GameControl
 
     private void GameLoop(object? sender, EventArgs e)
     {
+        var now = _renderStopwatch.Elapsed.TotalSeconds;
+        var dt = now - _lastRenderTime;
+        if (dt < TargetFrameSeconds) return;
+        _lastRenderTime = now;
+
         EnemyManager.Instance.UpdateAll();
+
         GameSurface.InvalidateVisual();
     }
 
     private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
     {
-        var canvas = e.Surface.Canvas;
-        canvas.Clear(SKColors.Gray);
-
-        _fieldRenderer.Render(canvas);
+        var varCanvas = e.Surface.Canvas;
+        varCanvas.Clear(SKColors.Gray);
+        _fieldRenderer.Render(varCanvas);
     }
 
     private void OnKeyDown(object sender, KeyEventArgs e)
@@ -94,7 +106,6 @@ public partial class GameControl
         var centerY = (float)GameSurface.ActualHeight / 2;
 
         _transform.OnMouseWheel(e.Delta, centerX, centerY, viewportWidth);
-        GameSurface.InvalidateVisual();
     }
 
     private void GameSurface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -115,6 +126,5 @@ public partial class GameControl
         if (e.LeftButton != MouseButtonState.Pressed) return;
         var pos = e.GetPosition(GameSurface);
         _transform.DragTo(new SKPoint((float)pos.X, (float)pos.Y));
-        GameSurface.InvalidateVisual();
     }
 }

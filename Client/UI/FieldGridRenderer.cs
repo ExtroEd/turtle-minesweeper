@@ -11,20 +11,20 @@ public class FieldGridRenderer : IDisposable
     private readonly float _cellSize;
 
     private SKImage? _minesImage;
-    private readonly MinesRenderer _minesRenderer;
+    private readonly SquaresRenderer _squaresRenderer;
     private readonly SKPaint _linePaint;
 
     private SKPath? _cachedGridPath;
     private float _lastScale = -1f;
     private int _lastStartX, _lastEndX, _lastStartY, _lastEndY;
+    private bool _disposed;
 
     public FieldGridRenderer(Field field, TransformController transform, float cellSize)
     {
         _field = field ?? throw new ArgumentNullException(nameof(field));
         _transform = transform ?? throw new ArgumentNullException(nameof(transform));
         _cellSize = cellSize;
-
-        _minesRenderer = new MinesRenderer(field, cellSize);
+        _squaresRenderer = new SquaresRenderer(field, cellSize);
 
         _linePaint = new SKPaint
         {
@@ -45,8 +45,7 @@ public class FieldGridRenderer : IDisposable
 
         using var surface = SKSurface.Create(info);
         var canvas = surface.Canvas;
-
-        _minesRenderer.Draw(canvas, _transform);
+        _squaresRenderer.Draw(canvas, _transform);
 
         _minesImage = surface.Snapshot();
     }
@@ -113,7 +112,6 @@ public class FieldGridRenderer : IDisposable
             }
 
             canvas.DrawPath(_cachedGridPath!, _linePaint);
-            Profiler.Mark("DrawPathGrid");
         }
 
         canvas.Restore();
@@ -130,14 +128,12 @@ public class FieldGridRenderer : IDisposable
                 var px = x * _cellSize;
                 path.MoveTo(px, startY * _cellSize);
                 path.LineTo(px, endY * _cellSize);
-                Profiler.Mark("CountLinesX");
             }
             for (var y = startY; y <= endY; y++)
             {
                 var py = y * _cellSize;
                 path.MoveTo(startX * _cellSize, py);
                 path.LineTo(endX * _cellSize, py);
-                Profiler.Mark("CountLinesY");
             }
         }
         else
@@ -149,13 +145,11 @@ public class FieldGridRenderer : IDisposable
 
             path.MoveTo(left, top);
             path.LineTo(left, bottom);
-
             path.MoveTo(right, top);
             path.LineTo(right, bottom);
 
             path.MoveTo(left, top);
             path.LineTo(right, top);
-
             path.MoveTo(left, bottom);
             path.LineTo(right, bottom);
         }
@@ -165,10 +159,20 @@ public class FieldGridRenderer : IDisposable
 
     public void Dispose()
     {
-        _linePaint.Dispose();
-        _minesImage?.Dispose();
-        _cachedGridPath?.Dispose();
-        _minesImage = null;
+        Dispose(true);
         GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (_disposed) return;
+        if (disposing)
+        {
+            _linePaint.Dispose();
+            _minesImage?.Dispose();
+            _cachedGridPath?.Dispose();
+            _squaresRenderer.Dispose();
+        }
+        _disposed = true;
     }
 }

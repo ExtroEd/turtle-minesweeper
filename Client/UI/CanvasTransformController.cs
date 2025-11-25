@@ -5,25 +5,64 @@ namespace Client.UI;
 
 public class TransformController
 {
-    public float Scale { get; private set; } = 1f;
-    public float OffsetX { get; set; }
-    public float OffsetY { get; set; }
+    public float Scale
+    {
+        get => _scale;
+        private set
+        {
+            if (!(Math.Abs(_scale - value) > 1e-6f)) return;
+            _scale = value;
+            _matrixDirty = true;
+        }
+    }
+
+    public float OffsetX
+    {
+        get => _offsetX;
+        set
+        {
+            if (!(Math.Abs(_offsetX - value) > 1e-6f)) return;
+            _offsetX = value;
+            _matrixDirty = true;
+        }
+    }
+
+    public float OffsetY
+    {
+        get => _offsetY;
+        set
+        {
+            if (!(Math.Abs(_offsetY - value) > 1e-6f)) return;
+            _offsetY = value;
+            _matrixDirty = true;
+        }
+    }
+
+    private float _scale = 1f;
+    private float _offsetX;
+    private float _offsetY;
 
     private bool _dragging;
     private SKPoint _lastMousePos;
 
     private const float CellSize = 20f;
-    
-    public SKMatrix Matrix
+
+    private SKMatrix _matrixCache;
+    private bool _matrixDirty = true;
+
+    public SKMatrix GetMatrixCached()
     {
-        get
-        {
-            var matrix = SKMatrix.CreateIdentity();
-            matrix = SKMatrix.Concat(matrix, SKMatrix.CreateTranslation(OffsetX, OffsetY));
-            matrix = SKMatrix.Concat(matrix, SKMatrix.CreateScale(Scale, Scale));
-            return matrix;
-        }
+        if (!_matrixDirty) return _matrixCache;
+
+        var scale = _scale;
+        _matrixCache = SKMatrix.CreateScale(scale, scale);
+        _matrixCache = _matrixCache.PostConcat(SKMatrix.CreateTranslation(_offsetX, _offsetY));
+
+        _matrixDirty = false;
+        return _matrixCache;
     }
+
+    public SKMatrix Matrix => GetMatrixCached();
 
     public void OnMouseWheel(float delta, float centerX, float centerY, float viewportWidth)
     {
@@ -50,12 +89,24 @@ public class TransformController
     public void DragTo(SKPoint pos)
     {
         if (!_dragging) return;
-        OffsetX += pos.X - _lastMousePos.X;
-        OffsetY += pos.Y - _lastMousePos.Y;
+
+        var dx = pos.X - _lastMousePos.X;
+        var dy = pos.Y - _lastMousePos.Y;
+
+        OffsetX += dx;
+        OffsetY += dy;
+
         _lastMousePos = pos;
     }
 
     public void EndDrag() => _dragging = false;
 
     public static float GetCellSize() => CellSize;
+
+    public void SnapToPixel(bool enable = true)
+    {
+        if (!enable) return;
+        OffsetX = (float)Math.Round(OffsetX);
+        OffsetY = (float)Math.Round(OffsetY);
+    }
 }

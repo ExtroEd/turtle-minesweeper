@@ -13,5 +13,6 @@
                    x:Name="VersionText"/>
 
         <Grid x:Name="MainContainer"/>
+        <local:ProfilerControl/>
     </Grid>
 </local:BaseWindow>

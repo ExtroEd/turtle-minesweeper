@@ -30,7 +30,6 @@ public class FieldRenderer
 
     public void Render(SKCanvas canvas)
     {
-        Profiler.Mark("FPS");
         canvas.Clear(SKColors.LightSlateGray);
 
         canvas.Save();

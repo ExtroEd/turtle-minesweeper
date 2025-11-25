@@ -4,14 +4,14 @@ using SkiaSharp;
 
 namespace Client.UI;
 
-public class MinesRenderer : IDisposable
+public class SquaresRenderer : IDisposable
 {
     private readonly Field _field;
     private readonly float _cellSize;
-
     private readonly SKSurface _persistentSurface;
+    private bool _disposed;
 
-    public MinesRenderer(Field field, float cellSize)
+    public SquaresRenderer(Field field, float cellSize)
     {
         _field = field ?? throw new ArgumentNullException(nameof(field));
         _cellSize = cellSize;
@@ -22,10 +22,10 @@ public class MinesRenderer : IDisposable
         _persistentSurface = SKSurface.Create(info)
                              ?? throw new InvalidOperationException("Failed to create SKSurface");
 
-        RebuildMinesLayer();
+        RebuildSquaresLayer();
     }
 
-    private void RebuildMinesLayer()
+    private void RebuildSquaresLayer()
     {
         var canvas = _persistentSurface.Canvas;
         canvas.Clear(SKColors.White);
@@ -89,6 +89,18 @@ public class MinesRenderer : IDisposable
 
     public void Dispose()
     {
-        _persistentSurface.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+        if (disposing)
+        {
+            _persistentSurface.Dispose();
+        }
+        _disposed = true;
     }
 }
