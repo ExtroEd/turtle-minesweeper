@@ -3,8 +3,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Client.Logic;
 
-
-namespace Client.UI;
+namespace Client.UI.Shared;
 
 public partial class ProfilerControl : IDisposable
 {

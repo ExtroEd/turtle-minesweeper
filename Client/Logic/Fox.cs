@@ -1,6 +1,5 @@
 ﻿using System.Windows;
-using Client.UI;
-
+using Client.UI.Menu;
 
 namespace Client.Logic;
 
@@ -15,9 +14,15 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed) 
 
     private readonly AStarPathFinder _pathfinder = new(field);
     private List<(int x, int y)> _path = [];
+    public IReadOnlyList<(int x, int y)> Path => _path;
     private int _pathIndex;
     private readonly float _speed = Math.Clamp(speed, 1, 10);
+
     private DateTime _lastMoveTime = DateTime.MinValue;
+
+    public DateTime LastPathRecalcTime { get; private set; } = DateTime.MinValue;
+
+    public double LastRecalcIntervalMs { get; private set; }
 
     private int _lastTargetX = int.MinValue;
     private int _lastTargetY = int.MinValue;
@@ -28,6 +33,18 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed) 
         _lastTargetX = tx;
         _lastTargetY = ty;
         return true;
+    }
+
+    private static double GetRecalcInterval(float dist)
+    {
+        return dist switch
+        {
+            > 300 => 5000 // 5s
+            ,
+            > 100 => 3000 // 3s
+            ,
+            _ => 0
+        };
     }
 
     public void Update()
@@ -41,15 +58,31 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed) 
         var tx = turtle.X;
         var ty = turtle.Y;
 
-        if (TargetChanged(tx, ty) || _pathIndex >= _path.Count)
+        var dxGrid = tx - X;
+        var dyGrid = ty - Y;
+        var distGrid = MathF.Sqrt(dxGrid * dxGrid + dyGrid * dyGrid);
+
+        var recalcInterval = GetRecalcInterval(distGrid);
+
+        if (recalcInterval <= 0) 
+            recalcInterval = 150.0;
+
+        var enoughTime = (now - LastPathRecalcTime).TotalMilliseconds >= recalcInterval;
+
+        if (enoughTime || TargetChanged(tx, ty) || _pathIndex >= _path.Count - 1)
         {
+            LastPathRecalcTime = now;
+            LastRecalcIntervalMs = recalcInterval;
             _path = _pathfinder.FindPath(X, Y, tx, ty);
             _pathIndex = 0;
         }
 
         if (_path.Count == 0) return;
 
-        var (targetX, targetY) = _pathIndex < _path.Count ? _path[_pathIndex] : (x: (int)MathF.Round(RenderX), y: (int)MathF.Round(RenderY));
+        var (targetX, targetY) =
+            _pathIndex < _path.Count
+                ? _path[_pathIndex]
+                : ((int)MathF.Round(RenderX), (int)MathF.Round(RenderY));
 
         var dx = targetX - RenderX;
         var dy = targetY - RenderY;
@@ -66,7 +99,7 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed) 
                 X = targetX;
                 Y = targetY;
 
-                if (_pathIndex < _path.Count)
+                if (_pathIndex < _path.Count - 1)
                     _pathIndex++;
             }
             else
@@ -76,11 +109,10 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed) 
             }
         }
 
-        var dxT = turtle.X - RenderX;
-        var dyT = turtle.Y - RenderY;
-        var distToTurtle = MathF.Sqrt(dxT * dxT + dyT * dyT);
+        var dxR = tx - RenderX;
+        var dyR = ty - RenderY;
 
-        if (!(distToTurtle < 0.8f)) return;
+        if (!(MathF.Sqrt(dxR * dxR + dyR * dyR) < 0.8f)) return;
         EnemyManager.Instance.StopAll();
         Application.Current.Dispatcher.Invoke(() =>
         {

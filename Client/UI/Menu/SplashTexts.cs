@@ -1,4 +1,4 @@
-﻿namespace Client.UI;
+﻿namespace Client.UI.Menu;
 
 public static class SplashTexts
 {

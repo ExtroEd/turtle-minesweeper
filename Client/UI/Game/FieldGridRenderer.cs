@@ -1,8 +1,7 @@
-﻿using SkiaSharp;
-using Client.Logic;
+﻿using Client.Logic;
+using SkiaSharp;
 
-
-namespace Client.UI;
+namespace Client.UI.Game;
 
 public class FieldGridRenderer : IDisposable
 {

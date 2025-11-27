@@ -1,7 +1,9 @@
-<local:BaseWindow x:Class="Client.UI.MainWindow"
+<menu:BaseWindow x:Class="Client.UI.Menu.MainWindow"
                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:local="clr-namespace:Client.UI"
+                  xmlns:menu="clr-namespace:Client.UI.Menu"
+                  xmlns:shared="clr-namespace:Client.UI.Shared"
                   Title="Turtle Minesweeper">
     
     <Grid>
@@ -13,6 +15,6 @@
                    x:Name="VersionText"/>
 
         <Grid x:Name="MainContainer"/>
-        <local:ProfilerControl/>
+        <shared:ProfilerControl/>
     </Grid>
-</local:BaseWindow>
+</menu:BaseWindow>

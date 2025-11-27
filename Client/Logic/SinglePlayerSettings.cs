@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
 
-
 namespace Client.Logic;
 
 public class SinglePlayerSettings

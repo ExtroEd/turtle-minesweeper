@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 
-
 namespace Client.Logic;
 
 public class FieldGenerator(Field field, Random random)

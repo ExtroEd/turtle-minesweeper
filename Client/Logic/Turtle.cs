@@ -1,6 +1,5 @@
 ﻿using System.Windows;
-using Client.UI;
-
+using Client.UI.Menu;
 
 namespace Client.Logic;
 

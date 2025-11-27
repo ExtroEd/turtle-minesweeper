@@ -1,7 +1,6 @@
 ﻿using SkiaSharp;
 
-
-namespace Client.UI;
+namespace Client.UI.Game;
 
 public class TransformController
 {
@@ -50,7 +49,7 @@ public class TransformController
     private SKMatrix _matrixCache;
     private bool _matrixDirty = true;
 
-    public SKMatrix GetMatrixCached()
+    private SKMatrix GetMatrixCached()
     {
         if (!_matrixDirty) return _matrixCache;
 
@@ -102,11 +101,4 @@ public class TransformController
     public void EndDrag() => _dragging = false;
 
     public static float GetCellSize() => CellSize;
-
-    public void SnapToPixel(bool enable = true)
-    {
-        if (!enable) return;
-        OffsetX = (float)Math.Round(OffsetX);
-        OffsetY = (float)Math.Round(OffsetY);
-    }
 }

@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using Client.Logic;
+using Client.UI.Shared;
 
-
-namespace Client.UI;
+namespace Client.UI.Menu;
 
 public partial class LoadingControl
 {
@@ -10,14 +10,16 @@ public partial class LoadingControl
     private readonly int _minePercent;
     private readonly int _wallPercent;
     private readonly int _foxSpeed;
+    private readonly bool _developerMode;
 
-    public LoadingControl(int gridSize, int minePercent, int wallPercent, int foxSpeed)
+    public LoadingControl(int gridSize, int minePercent, int wallPercent, int foxSpeed, bool developerMode = false)
     {
         InitializeComponent();
         _gridSize = gridSize;
         _minePercent = minePercent;
         _wallPercent = wallPercent;
-        _foxSpeed = foxSpeed;
+        _foxSpeed = foxSpeed;    
+        _developerMode = developerMode;
 
         Loaded += OnLoaded;
     }
@@ -51,7 +53,8 @@ public partial class LoadingControl
                         _gridSize,
                         _minePercent,
                         _wallPercent,
-                        _foxSpeed
+                        _foxSpeed, 
+                        _developerMode
                     ));
                 }
             });

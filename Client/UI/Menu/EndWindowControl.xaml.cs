@@ -1,8 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Threading;
 
-
-namespace Client.UI;
+namespace Client.UI.Menu;
 
 public partial class EndWindowControl
 {

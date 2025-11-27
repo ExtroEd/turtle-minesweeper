@@ -1,33 +1,42 @@
 ﻿using System.Diagnostics;
-using SkiaSharp.Views.Desktop;
 using System.Windows.Input;
 using System.Windows.Media;
 using Client.Logic;
+using Client.UI.Game;
 using SkiaSharp;
+using SkiaSharp.Views.Desktop;
 
-
-namespace Client.UI;
+namespace Client.UI.Shared;
 
 public partial class GameControl
 {
-    private readonly Turtle _turtle;
     private readonly TransformController _transform = new();
     private readonly FieldRenderer _fieldRenderer;
 
     private readonly Stopwatch _renderStopwatch = new();
     private double _lastRenderTime;
     private const double TargetFrameSeconds = 1.0 / 60.0;
+    private readonly Dictionary<KeyBindingManager.GameAction, Action> _actionMap;
 
-    public GameControl(int gridSize, int minePercent, int wallPercent, int foxSpeed = 0)
+    public GameControl(int gridSize, int minePercent, int wallPercent, int foxSpeed = 0, bool developerMode = false)
     {
         InitializeComponent();
 
         var field = new Field(gridSize);
         new FieldGenerator(field, new Random()).Generate(minePercent, wallPercent);
 
-        _turtle = new Turtle(field);
-        _fieldRenderer = new FieldRenderer(field, _turtle, _transform, 1, 1);
-
+        var turtle = new Turtle(field);
+        _fieldRenderer = new FieldRenderer(field, turtle, _transform, 1, 1);
+        _fieldRenderer.SetDeveloperMode(developerMode);
+        
+        _actionMap = new Dictionary<KeyBindingManager.GameAction, Action>
+        {
+            { KeyBindingManager.GameAction.MoveUp, () => turtle.MoveUp() },
+            { KeyBindingManager.GameAction.MoveDown, () => turtle.MoveDown() },
+            { KeyBindingManager.GameAction.MoveLeft, () => turtle.MoveLeft() },
+            { KeyBindingManager.GameAction.MoveRight, () => turtle.MoveRight() }
+        };
+        
         CompositionTarget.Rendering += GameLoop;
 
         Loaded += (_, _) =>
@@ -39,7 +48,7 @@ public partial class GameControl
             {
                 var fx = field.FlagX;
                 var fy = field.FlagY;
-                var fox = new Fox(fx, fy, field, _turtle, foxSpeed);
+                var fox = new Fox(fx, fy, field, turtle, foxSpeed);
                 EnemyManager.Instance.AddEnemy(fox);
                 _fieldRenderer.SetFox(fox);
             }
@@ -85,17 +94,19 @@ public partial class GameControl
 
     private void OnKeyDown(object sender, KeyEventArgs e)
     {
-        switch (e.Key)
+        var action = KeyBindingManager.Resolve(e.Key);
+        if (action == null)
+            return;
+
+        if (_actionMap.TryGetValue(action.Value, out var method))
         {
-            case Key.Up:
-            case Key.W: _turtle.MoveUp(); break;
-            case Key.Down:
-            case Key.S: _turtle.MoveDown(); break;
-            case Key.Left:
-            case Key.A: _turtle.MoveLeft(); break;
-            case Key.Right:
-            case Key.D: _turtle.MoveRight(); break;
+            method();
         }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(e), action.Value, "Unrecognized game action");
+        }
+
         GameSurface.InvalidateVisual();
     }
 

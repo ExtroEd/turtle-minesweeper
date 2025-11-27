@@ -1,11 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using Client.Logic;
-using System.Windows.Media.Animation;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using Client.Logic;
 
-
-namespace Client.UI;
+namespace Client.UI.Menu;
 
 public partial class SinglePlayerControl
 {
@@ -23,6 +23,11 @@ public partial class SinglePlayerControl
         _settings = SinglePlayerSettings.Load();
         _control = new Logic.SinglePlayerControl(_settings);
 
+        GridSizeSlider.PreviewMouseWheel += Slider_MouseWheel;
+        TotalObstacleSlider.PreviewMouseWheel += Slider_MouseWheel;
+        SplitSlider.PreviewMouseWheel += Slider_MouseWheel;
+        FoxSpeedSlider.PreviewMouseWheel += Slider_MouseWheel;
+        
         ApplySettingsToUI();
 
         _isInitializing = false;
@@ -169,16 +174,30 @@ public partial class SinglePlayerControl
         _isInitializing = false;
     }
 
+    private static void Slider_MouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (sender is not Slider slider) return;
+        var delta = e.Delta > 0 ? 1 : -1;
+        var newVal = slider.Value + delta * (slider.TickFrequency > 0 ? slider.TickFrequency : 1);
+
+        newVal = Math.Max(slider.Minimum, Math.Min(slider.Maximum, newVal));
+        slider.Value = newVal;
+
+        e.Handled = true;
+    }
+    
     private void StartGame_Click(object? sender, RoutedEventArgs e)
     {
         if (!_control.TryValidateAll(GridSizeTextBox, MinePercentTextBlock, WallPercentTextBlock,
                                    FoxSpeedTextBox, EnableFoxCheckBox.IsChecked == true))
             return;
 
+        var developerMode = DeveloperModeCheckBox.IsChecked == true;
         _control.SaveSettings();
-
-        var loading = new LoadingControl(_settings.GridSize, _settings.MinePercent,
-                                         _settings.WallPercent, _settings.FoxSpeed);
+        
+        var loading = new Menu.LoadingControl(_settings.GridSize, 
+            _settings.MinePercent, _settings.WallPercent, _settings.FoxSpeed, 
+            developerMode);
 
         if (Application.Current.MainWindow is MainWindow main)
             main.SwitchContent(loading);

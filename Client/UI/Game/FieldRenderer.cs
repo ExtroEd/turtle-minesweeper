@@ -1,8 +1,7 @@
 ﻿using Client.Logic;
 using SkiaSharp;
 
-
-namespace Client.UI;
+namespace Client.UI.Game;
 
 public class FieldRenderer
 {
@@ -46,5 +45,10 @@ public class FieldRenderer
     {
         _transform.OffsetX = canvasWidth / 2f - _turtle.X * _cellSize * _transform.Scale;
         _transform.OffsetY = canvasHeight / 2f - _turtle.Y * _cellSize * _transform.Scale;
+    }
+    
+    public void SetDeveloperMode(bool devMode)
+    {
+        _objectsRenderer.DeveloperMode = devMode;
     }
 }

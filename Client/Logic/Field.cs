@@ -2,7 +2,7 @@
 
 public class Field
 {
-    private readonly char[,] _grid; //ignore
+    private readonly char[,] _grid;
     private readonly bool[,] _hasMine;
 
     public int Size { get; }

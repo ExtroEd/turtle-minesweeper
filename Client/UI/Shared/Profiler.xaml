@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Client.UI.ProfilerControl"
+﻿<UserControl x:Class="Client.UI.Shared.ProfilerControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              HorizontalAlignment="Left"

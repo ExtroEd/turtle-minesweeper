@@ -5,8 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 
-
-namespace Client.UI;
+namespace Client.UI.Menu;
 
 public class BaseWindow : Window
 {

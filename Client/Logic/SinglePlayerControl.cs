@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-
 namespace Client.Logic;
 
 public class SinglePlayerControl(SinglePlayerSettings settings)

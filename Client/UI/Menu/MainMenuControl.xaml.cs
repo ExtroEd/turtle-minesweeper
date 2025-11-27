@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 
-
-namespace Client.UI;
+namespace Client.UI.Menu;
 
 public partial class MainMenuControl
 {

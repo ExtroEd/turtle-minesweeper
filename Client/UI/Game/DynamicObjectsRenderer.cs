@@ -1,8 +1,7 @@
 ﻿using Client.Logic;
 using SkiaSharp;
 
-
-namespace Client.UI;
+namespace Client.UI.Game;
 
 public class DynamicObjectsRenderer(
     Turtle turtle,
@@ -10,6 +9,7 @@ public class DynamicObjectsRenderer(
     float cellSize)
 {
     private Fox? _fox;
+    public bool DeveloperMode { get; set; }
 
     public void SetFox(Fox fox) => _fox = fox;
 
@@ -26,8 +26,30 @@ public class DynamicObjectsRenderer(
 
         DrawIfVisible(turtle.X, turtle.Y, SKColors.Green);
 
-        if (_fox != null)
-            DrawIfVisible(_fox.RenderX, _fox.RenderY, SKColors.OrangeRed);
+        if (_fox == null) return;
+        DrawIfVisible(_fox.RenderX, _fox.RenderY, SKColors.OrangeRed);
+        
+        if (!DeveloperMode || _fox.Path is not { Count: > 1 }) return;
+        
+        var now = DateTime.Now;
+        var fresh = (now - _fox.LastPathRecalcTime).TotalMilliseconds <= _fox.LastRecalcIntervalMs + 50;
+
+        if (!fresh)
+            return;
+                
+        using var pathPaint = new SKPaint();
+        pathPaint.Color = SKColors.OrangeRed;
+        pathPaint.Style = SKPaintStyle.Stroke;
+        pathPaint.StrokeWidth = 3;
+        pathPaint.IsAntialias = true;
+
+        var points = _fox.Path
+            .Select(p => new SKPoint(
+                p.x * cellSize + cellSize / 2,
+                p.y * cellSize + cellSize / 2))
+            .ToArray();
+
+        canvas.DrawPoints(SKPointMode.Polygon, points, pathPaint);
         return;
 
         void DrawIfVisible(float objX, float objY, SKColor color)
