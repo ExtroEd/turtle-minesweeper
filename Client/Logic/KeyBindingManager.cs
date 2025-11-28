@@ -9,7 +9,8 @@ public static class KeyBindingManager
         MoveUp,
         MoveDown,
         MoveLeft,
-        MoveRight
+        MoveRight,
+        ToggleProfiler
     }
 
     private static readonly Dictionary<GameAction, Key> Bindings = new()
@@ -17,7 +18,8 @@ public static class KeyBindingManager
         { GameAction.MoveUp, Key.W },
         { GameAction.MoveDown, Key.S },
         { GameAction.MoveLeft, Key.A },
-        { GameAction.MoveRight, Key.D }
+        { GameAction.MoveRight, Key.D },
+        { GameAction.ToggleProfiler, Key.F3 }
     };
 
     public static Key GetKey(GameAction action) => Bindings[action];

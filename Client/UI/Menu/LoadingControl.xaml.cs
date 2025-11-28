@@ -12,7 +12,8 @@ public partial class LoadingControl
     private readonly int _foxSpeed;
     private readonly bool _developerMode;
 
-    public LoadingControl(int gridSize, int minePercent, int wallPercent, int foxSpeed, bool developerMode = false)
+    public LoadingControl(int gridSize, int minePercent, int wallPercent, 
+        int foxSpeed, bool developerMode = false)
     {
         InitializeComponent();
         _gridSize = gridSize;

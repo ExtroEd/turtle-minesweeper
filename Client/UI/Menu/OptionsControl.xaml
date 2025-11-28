@@ -35,6 +35,11 @@
                 <Button x:Name="MoveRightButton" Width="100" Click="Rebind_Click"/>
             </StackPanel>
             
+            <StackPanel Orientation="Horizontal" Margin="0,5">
+                <TextBlock Text="Toggle Profiler:" Width="120"/>
+                <Button x:Name="ToggleProfilerButton" Width="100" Click="Rebind_Click"/>
+            </StackPanel>
+            
             <Button Content="Apply Settings" 
                     Style="{StaticResource MainButtonStyle}" 
                     Click="ApplySettings_Click" 

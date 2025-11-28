@@ -12,7 +12,8 @@ public class GameSettings
         { KeyBindingManager.GameAction.MoveUp, Key.W },
         { KeyBindingManager.GameAction.MoveDown, Key.S },
         { KeyBindingManager.GameAction.MoveLeft, Key.A },
-        { KeyBindingManager.GameAction.MoveRight, Key.D }
+        { KeyBindingManager.GameAction.MoveRight, Key.D },
+        { KeyBindingManager.GameAction.ToggleProfiler, Key.F3 }
     };
 
     private static readonly string SettingsPath =
@@ -64,7 +65,8 @@ public class GameSettings
             { KeyBindingManager.GameAction.MoveUp, Key.W },
             { KeyBindingManager.GameAction.MoveDown, Key.S },
             { KeyBindingManager.GameAction.MoveLeft, Key.A },
-            { KeyBindingManager.GameAction.MoveRight, Key.D }
+            { KeyBindingManager.GameAction.MoveRight, Key.D },
+            { KeyBindingManager.GameAction.ToggleProfiler, Key.F3 }
         };
     }
 }

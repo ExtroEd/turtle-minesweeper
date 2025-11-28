@@ -29,7 +29,9 @@
                     Maximum="80" 
                     TickFrequency="1" 
                     IsSnapToTickEnabled="True" 
-                    ValueChanged="TotalObstacleSlider_OnValueChanged"/>
+                    ValueChanged="TotalObstacleSlider_OnValueChanged"
+                    Margin="0,10,0,0"/>
+
             <TextBlock HorizontalAlignment="Center"
                        Text="{Binding ElementName=TotalObstacleSlider,
                               Path=Value,
@@ -39,44 +41,55 @@
             <StackPanel x:Name="SplitPanel" Margin="0,10,0,0">
                 <TextBlock Text="Wall / Mine distribution" 
                            Style="{StaticResource LabelTextStyle}"/>
-                <Grid Margin="0,5,0,0">
+                <Grid Margin="0,5,0,0" VerticalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*"/>
-                        <ColumnDefinition Width="80"/>
-                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                    <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
                         <TextBlock Text="Walls %" Style="{StaticResource LabelTextStyle}" />
                         <TextBlock x:Name="WallPercentTextBlock"
                                    Width="50"
                                    Text="{Binding WallPercent}" 
-                                   HorizontalAlignment="Center"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">
+                        <TextBlock Text="Mines %" Style="{StaticResource LabelTextStyle}" />
+                        <TextBlock x:Name="MinePercentTextBlock"
+                                   Width="50"
+                                   Text="{Binding MinePercent}" 
+                                   HorizontalAlignment="Right"
                                    VerticalAlignment="Center"
                                    TextAlignment="Center"/>
                     </StackPanel>
 
                     <Slider x:Name="SplitSlider"
-                            Grid.Column="1"
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
                             Minimum="0"
                             Maximum="80"
                             TickFrequency="1" 
                             IsSnapToTickEnabled="True" 
                             ValueChanged="SplitSlider_OnValueChanged"
-                            Orientation="Vertical"
-                            Height="80"
+                            Orientation="Horizontal"
                             VerticalAlignment="Center"
-                            HorizontalAlignment="Center"/>
-
-                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
-                        <TextBlock Text="Mines %" Style="{StaticResource LabelTextStyle}" />
-                        <TextBlock x:Name="MinePercentTextBlock"
-                                   Width="50"
-                                   Text="{Binding MinePercent}" 
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   TextAlignment="Center"/>
-                    </StackPanel>
+                            HorizontalAlignment="Stretch"
+                            Margin="0,10,0,0">
+                        <Slider.LayoutTransform>
+                            <ScaleTransform ScaleX="-1" />
+                        </Slider.LayoutTransform>
+                    </Slider>
                 </Grid>
             </StackPanel>
 

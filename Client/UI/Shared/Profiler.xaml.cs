@@ -43,11 +43,15 @@ public partial class ProfilerControl : IDisposable
 
     private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key != Key.F3) return;
+        var profilerKey = KeyBindingManager.GetKey(KeyBindingManager.GameAction.ToggleProfiler);
+
+        if (e.Key != profilerKey)
+            return;
+
         ToggleVisibility();
         e.Handled = true;
     }
-
+    
     private void ToggleVisibility()
     {
         _visible = !_visible;
