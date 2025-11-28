@@ -12,12 +12,17 @@ public partial class GameControl
 {
     private readonly TransformController _transform = new();
     private readonly FieldRenderer _fieldRenderer;
+    private readonly Turtle _turtle;
 
     private readonly Stopwatch _renderStopwatch = new();
     private double _lastRenderTime;
     private const double TargetFrameSeconds = 1.0 / 60.0;
     private readonly Dictionary<KeyBindingManager.GameAction, Action> _actionMap;
 
+    private bool _isFollowLocked;
+    private double _followLockTimeRemaining;
+    private const double FollowLockDuration = 3.0;
+    
     public GameControl(int gridSize, int minePercent, int wallPercent, int foxSpeed = 0, bool developerMode = false)
     {
         InitializeComponent();
@@ -26,6 +31,7 @@ public partial class GameControl
         new FieldGenerator(field, new Random()).Generate(minePercent, wallPercent);
 
         var turtle = new Turtle(field);
+        _turtle = turtle;
         _fieldRenderer = new FieldRenderer(field, turtle, _transform, 1, 1);
         _fieldRenderer.SetDeveloperMode(developerMode);
         
@@ -80,8 +86,31 @@ public partial class GameControl
         if (dt < TargetFrameSeconds) return;
         _lastRenderTime = now;
 
+        if (_isFollowLocked)
+        {
+            _followLockTimeRemaining -= dt;
+            if (_followLockTimeRemaining <= 0)
+            {
+                _isFollowLocked = false;
+            }
+        }
+        
         EnemyManager.Instance.UpdateAll();
 
+        if (!_isFollowLocked)
+        {
+            var turtleWorldX = _turtle.X * TransformController.GetCellSize(); 
+            var turtleWorldY = _turtle.Y * TransformController.GetCellSize();
+        
+            _transform.SmoothFocus(
+                turtleWorldX, 
+                turtleWorldY, 
+                (float)GameSurface.ActualWidth, 
+                (float)GameSurface.ActualHeight, 
+                dt
+            );
+        }
+        
         GameSurface.InvalidateVisual();
     }
 
@@ -130,6 +159,9 @@ public partial class GameControl
     {
         _transform.EndDrag();
         GameSurface.ReleaseMouseCapture();
+        
+        _isFollowLocked = true;
+        _followLockTimeRemaining = FollowLockDuration;
     }
 
     private void GameSurface_MouseMove(object sender, MouseEventArgs e)

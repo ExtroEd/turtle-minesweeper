@@ -54,6 +54,32 @@ public class SinglePlayerControl(SinglePlayerSettings settings)
         _internal = false;
     }
 
+    public static int ClampGridSize(int value)
+        => Math.Max(10, Math.Min(500, value));
+
+    public static int ClampFoxSpeed(int value)
+        => Math.Max(1, Math.Min(10, value));
+
+    public void Randomize()
+    {
+        var rnd = new Random();
+
+        settings.GridSize = rnd.Next(10, 501);
+
+        var totalPercent = rnd.Next(1, 81);
+        settings.MinePercent = rnd.Next(0, totalPercent + 1);
+        settings.WallPercent = totalPercent - settings.MinePercent;
+
+        settings.FoxSpeed = rnd.Next(1, 11);
+        settings.EnableFox = rnd.Next(0, 2) == 1;
+    }
+
+    public static (int mines, int walls) ComputeSplit(int total, int mines)
+    {
+        mines = Math.Max(0, Math.Min(total, mines));
+        return (mines, total - mines);
+    }
+
     public bool TryValidateAll(TextBox gridSizeBox, TextBlock minesBlock, TextBlock wallsBlock,
                                TextBox foxSpeedBox, bool foxEnabled)
     {

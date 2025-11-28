@@ -117,9 +117,7 @@ public partial class SinglePlayerControl
         if (SplitSlider == null || MinePercentTextBlock == null || WallPercentTextBlock == null) return;
 
         var total = (int)TotalObstacleSlider.Value;
-
-        var mines = (int)SplitSlider.Value;
-        var walls = total - mines;
+        var (mines, walls) = Logic.SinglePlayerControl.ComputeSplit(total, (int)SplitSlider.Value);
 
         MinePercentTextBlock.Text = mines.ToString();
         WallPercentTextBlock.Text = walls.ToString();
@@ -130,8 +128,7 @@ public partial class SinglePlayerControl
     private void GridSizeTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
         if (!int.TryParse(GridSizeTextBox.Text, out var value)) return;
-        value = Math.Max(10, Math.Min(500, value));
-        GridSizeSlider.Value = value;
+        GridSizeSlider.Value = Logic.SinglePlayerControl.ClampGridSize(value);
     }
 
     private void EnableFoxCheckBox_Checked(object? sender, RoutedEventArgs e)
@@ -150,9 +147,8 @@ public partial class SinglePlayerControl
     
     private void FoxSpeedTextBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
-        if (!double.TryParse(FoxSpeedTextBox.Text, out var value)) return;
-        value = Math.Max(1, Math.Min(10, value));
-        FoxSpeedSlider.Value = value;
+        if (!int.TryParse(FoxSpeedTextBox.Text, out var value)) return;
+        FoxSpeedSlider.Value = Logic.SinglePlayerControl.ClampFoxSpeed(value);
     }
 
     private void GridSizeSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -167,17 +163,7 @@ public partial class SinglePlayerControl
     
     private void RandomButton_Click(object sender, RoutedEventArgs e)
     {
-        var rnd = new Random();
-
-        _settings.GridSize = rnd.Next(10, 501);
-
-        var totalPercent = rnd.Next(1, 81);
-        _settings.MinePercent = rnd.Next(0, totalPercent + 1);
-        _settings.WallPercent = totalPercent - _settings.MinePercent;
-
-        _settings.FoxSpeed = rnd.Next(1, 11);
-
-        _settings.EnableFox = rnd.Next(0, 2) == 1;
+        _control.Randomize();
 
         _isInitializing = true;
         ApplySettingsToUI();

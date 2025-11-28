@@ -13,7 +13,7 @@ public sealed class ProfilerLogic : IDisposable
 
     private const string CsvHeader = "timestamp,avg_fps,min_fps,quantile_fps,avg_ms,min_ms,quantile_ms,count\n";
 
-    private readonly List<(double time, double fps)> _samples = new();
+    private readonly List<(double time, double fps)> _samples = [];
     private readonly Stopwatch _sw = new();
     private double _lastSampleTime;
     private double _lastAutoSaveTime;

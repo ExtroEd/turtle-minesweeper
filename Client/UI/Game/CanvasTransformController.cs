@@ -99,6 +99,26 @@ public class TransformController
     }
 
     public void EndDrag() => _dragging = false;
+    
+    public void SmoothFocus(float targetX, float targetY, float viewW, float viewH, double dt, float speed = 3f)
+    {
+        if (_dragging) return;
+        
+        var desiredOffsetX = (viewW / 2f) - (targetX * _scale);
+        var desiredOffsetY = (viewH / 2f) - (targetY * _scale);
+        
+        var t = (float)(speed * dt);
+        
+        if (t > 1f) t = 1f;
 
+        OffsetX = Lerp(OffsetX, desiredOffsetX, t);
+        OffsetY = Lerp(OffsetY, desiredOffsetY, t);
+    }
+
+    private static float Lerp(float start, float end, float t)
+    {
+        return start + (end - start) * t;
+    }
+    
     public static float GetCellSize() => CellSize;
 }
