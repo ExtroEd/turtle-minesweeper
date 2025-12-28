@@ -30,10 +30,9 @@ public class FieldRenderer
     public void Render(SKCanvas canvas)
     {
         canvas.Clear(SKColors.LightSlateGray);
-
+        
         canvas.Save();
-        canvas.Translate(_transform.OffsetX, _transform.OffsetY);
-        canvas.Scale(_transform.Scale, _transform.Scale);
+        canvas.SetMatrix(_transform.Matrix);
 
         _gridRenderer.Draw(canvas);
         _objectsRenderer.Draw(canvas);

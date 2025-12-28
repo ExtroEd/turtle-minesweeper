@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Linq;
 
 namespace Client.Logic;
 
@@ -11,9 +12,10 @@ public sealed class ProfilerLogic : IDisposable
     private const double AutoSaveIntervalSeconds = 5.0;
     private const double QuantileFraction = 0.05;
 
-    private const string CsvHeader = "timestamp,avg_fps,min_fps,quantile_fps,avg_ms,min_ms,quantile_ms,count\n";
+    // Добавил поля FindPathCalls и FindPathAvgMs в CSV
+    private const string CsvHeader = "timestamp,avg_fps,min_fps,quantile_fps,avg_ms,min_ms,quantile_ms,count,findpath_calls,findpath_avg_ms\n";
 
-    private readonly List<(double time, double fps)> _samples = [];
+    private readonly List<(double time, double fps)> _samples = new();
     private readonly Stopwatch _sw = new();
     private double _lastSampleTime;
     private double _lastAutoSaveTime;
@@ -111,7 +113,12 @@ public sealed class ProfilerLogic : IDisposable
         var quantileMs = ComputeUpperQuantile(frameTimesMs, QuantileFraction);
 
         var count = fpsValues.Length;
-        stats = new ProfilerStats(avgFps, minFps, quantileFps, avgMs, minMs, quantileMs, count);
+
+        // Telemetry: берем кумулятивные значения (с начала запуска приложения)
+        var (calls, totalMs) = Telemetry.GetFindPathTotals();
+        double avgFindMs = calls > 0 ? (double)totalMs / calls : 0.0;
+
+        stats = new ProfilerStats(avgFps, minFps, quantileFps, avgMs, minMs, quantileMs, count, calls, avgFindMs);
         return true;
     }
 
@@ -168,9 +175,12 @@ public sealed class ProfilerLogic : IDisposable
 
             var count = fpsValues.Length;
 
+            var (calls, totalMs) = Telemetry.GetFindPathTotals();
+            double avgFindMs = calls > 0 ? (double)totalMs / calls : 0.0;
+
             var line = string.Format(CultureInfo.InvariantCulture,
-                "{0:O},{1:F1},{2:F1},{3:F1},{4:F1},{5:F1},{6:F1},{7}\n",
-                DateTime.UtcNow, avgFps, minFps, quantileFps, avgMs, minMs, quantileMs, count);
+                "{0:O},{1:F1},{2:F1},{3:F1},{4:F1},{5:F1},{6:F1},{7},{8},{9:F1}\n",
+                DateTime.UtcNow, avgFps, minFps, quantileFps, avgMs, minMs, quantileMs, count, calls, avgFindMs);
 
             await Task.Run(() => File.AppendAllText(_outputFile, line));
         }
@@ -191,6 +201,7 @@ public sealed class ProfilerLogic : IDisposable
     }
 }
 
+// Добавлены поля findpath_calls и findpath_avg_ms
 public readonly record struct ProfilerStats(
     double AverageFps,
     double MinFps,
@@ -198,5 +209,7 @@ public readonly record struct ProfilerStats(
     double AverageMs,
     double MinMs,
     double QuantileMs,
-    int Count);
+    int Count,
+    long FindPathCalls,
+    double FindPathAvgMs);
     

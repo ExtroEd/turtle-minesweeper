@@ -93,7 +93,9 @@ public partial class ProfilerControl : IDisposable
             $"Frame time avg: {stats.AverageMs:F1} ms\n" +
             $"Frame time min: {stats.MinMs:F1} ms\n" +
             $"{(int)(0.05 * 100)}% quantile (ms): {stats.QuantileMs:F1} ms\n\n" +
-            $"samples: {stats.Count}";
+            $"samples: {stats.Count}\n\n" +
+            $"A* calls total: {stats.FindPathCalls}\n" +
+            $"A* avg time: {stats.FindPathAvgMs:F1} ms";
     }
 
     public void Dispose()

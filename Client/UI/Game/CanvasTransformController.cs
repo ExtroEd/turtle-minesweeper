@@ -100,24 +100,25 @@ public class TransformController
 
     public void EndDrag() => _dragging = false;
     
-    public void SmoothFocus(float targetX, float targetY, float viewW, float viewH, double dt, float speed = 3f)
+    public void SmoothFocus(float targetX, float targetY, float viewW, float viewH, double dt, float speed = 4f)
     {
         if (_dragging) return;
-        
+        if (dt <= 0) return;
+
         var desiredOffsetX = (viewW / 2f) - (targetX * _scale);
         var desiredOffsetY = (viewH / 2f) - (targetY * _scale);
-        
-        var t = (float)(speed * dt);
-        
-        if (t > 1f) t = 1f;
 
-        OffsetX = Lerp(OffsetX, desiredOffsetX, t);
-        OffsetY = Lerp(OffsetY, desiredOffsetY, t);
-    }
+        var alpha = 1f - MathF.Exp(-speed * (float)dt);
+        alpha = Math.Clamp(alpha, 0f, 1f);
 
-    private static float Lerp(float start, float end, float t)
-    {
-        return start + (end - start) * t;
+        var newOffsetX = OffsetX + (desiredOffsetX - OffsetX) * alpha;
+        var newOffsetY = OffsetY + (desiredOffsetY - OffsetY) * alpha;
+
+        if (MathF.Abs(desiredOffsetX - newOffsetX) < 0.001f) newOffsetX = desiredOffsetX;
+        if (MathF.Abs(desiredOffsetY - newOffsetY) < 0.001f) newOffsetY = desiredOffsetY;
+
+        OffsetX = newOffsetX;
+        OffsetY = newOffsetY;
     }
     
     public static float GetCellSize() => CellSize;

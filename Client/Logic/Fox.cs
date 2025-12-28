@@ -35,15 +35,14 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed) 
         return true;
     }
 
+    // Интервалы пересчёта в миллисекундах (в зависимости от расстояния)
     private static double GetRecalcInterval(float dist)
     {
         return dist switch
         {
-            > 300 => 5000 // 5s
-            ,
-            > 100 => 3000 // 3s
-            ,
-            _ => 0
+            > 300 => 5000.0,
+            > 100 => 3000.0,
+            _ => 300.0
         };
     }
 
@@ -63,18 +62,32 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed) 
         var distGrid = MathF.Sqrt(dxGrid * dxGrid + dyGrid * dyGrid);
 
         var recalcInterval = GetRecalcInterval(distGrid);
-
-        if (recalcInterval <= 0) 
-            recalcInterval = 150.0;
+        if (recalcInterval <= 0) recalcInterval = 300.0;
 
         var enoughTime = (now - LastPathRecalcTime).TotalMilliseconds >= recalcInterval;
+        var targetChanged = TargetChanged(tx, ty);
 
-        if (enoughTime || TargetChanged(tx, ty) || _pathIndex >= _path.Count - 1)
+        var pathExhausted = _pathIndex >= Math.Max(0, _path.Count - 1);
+
+        // Если цель изменилась, но черепашка далеко — не пересчитываем сразу.
+        // Немедленный пересчёт разрешаем только когда черепашка близко (closeThreshold).
+        const float closeThreshold = 4.0f; // клетки
+        var needImmediateOnTargetChange = targetChanged && distGrid <= closeThreshold;
+
+        if (enoughTime || pathExhausted || needImmediateOnTargetChange)
         {
+            // Обновляем время последнего запроса сразу — это защитит от спама, пока FindPath выполняется
             LastPathRecalcTime = now;
             LastRecalcIntervalMs = recalcInterval;
-            _path = _pathfinder.FindPath(X, Y, tx, ty);
-            _pathIndex = 0;
+
+            var newPath = _pathfinder.FindPath(X, Y, tx, ty);
+
+            // Если путь поменялся — применяем, иначе оставляем старый (чтобы не сбрасывать индекс)
+            if (!PathsEqual(_path, newPath))
+            {
+                _path = newPath;
+                _pathIndex = 0;
+            }
         }
 
         if (_path.Count == 0) return;
@@ -119,6 +132,17 @@ public class Fox(int startX, int startY, Field field, Turtle turtle, int speed) 
             if (Application.Current.MainWindow is MainWindow main)
                 main.SwitchContent(new EndWindowControl("You were eaten by the fox! 🦊"));
         });
+    }
+
+    private static bool PathsEqual(List<(int x, int y)> a, List<(int x, int y)> b)
+    {
+        if (ReferenceEquals(a, b)) return true;
+        if (a.Count != b.Count) return false;
+        for (var i = 0; i < a.Count; i++)
+        {
+            if (a[i].x != b[i].x || a[i].y != b[i].y) return false;
+        }
+        return true;
     }
 
     public void Stop()
