@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Client.UI.Menu.OptionsControl"
+<UserControl x:Class="Client.UI.Menu.OptionsControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid>
@@ -13,7 +13,23 @@
                 <ComboBoxItem Content="Windowed" />
             </ComboBox>
 
-            <TextBlock Text="Controls" FontWeight="Bold" Margin="0,0,0,10"/>
+            <TextBlock Text="Music Volume" FontWeight="Bold" Margin="0,10,0,5"/>
+            <StackPanel Orientation="Horizontal" Margin="0,5">
+                <Slider x:Name="MusicVolumeSlider" 
+                        Width="200" 
+                        Minimum="0" 
+                        Maximum="100" 
+                        Value="50" 
+                        VerticalAlignment="Center"
+                        ValueChanged="MusicVolumeSlider_ValueChanged"/>
+                <TextBlock x:Name="MusicVolumeLabel" 
+                           Text="50%" 
+                           Width="50" 
+                           Margin="10,0,0,0"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <TextBlock Text="Controls" FontWeight="Bold" Margin="0,20,0,10"/>
 
             <StackPanel Orientation="Horizontal" Margin="0,5">
                 <TextBlock Text="Move Up:" Width="120"/>
