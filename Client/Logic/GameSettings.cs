@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text.Json;
 using System.Windows.Input;
 
@@ -7,6 +7,7 @@ namespace Client.Logic;
 public class GameSettings
 {
     public int WindowModeIndex { get; set; }
+    public int MusicVolume { get; set; } = 50;
     public Dictionary<KeyBindingManager.GameAction, Key> KeyBindings { get; set; } = new()
     {
         { KeyBindingManager.GameAction.MoveUp, Key.W },
@@ -60,6 +61,7 @@ public class GameSettings
     public void ResetToDefaults()
     {
         WindowModeIndex = 0;
+        MusicVolume = 50;
         KeyBindings = new Dictionary<KeyBindingManager.GameAction, Key>
         {
             { KeyBindingManager.GameAction.MoveUp, Key.W },
