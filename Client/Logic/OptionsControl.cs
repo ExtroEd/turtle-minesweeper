@@ -1,4 +1,4 @@
-﻿using System.Windows.Input;
+using System.Windows.Input;
 
 namespace Client.Logic;
 
@@ -6,6 +6,7 @@ public class OptionsControl
 {
     public GameSettings Settings { get; } = GameSettings.Load();
     public int LastAppliedWindowMode { get; private set; }
+    public int LastAppliedMusicVolume { get; private set; }
 
     public void ApplyWindowMode(int selectedIndex, System.Windows.Window mainWindow)
     {
@@ -34,9 +35,17 @@ public class OptionsControl
         LastAppliedWindowMode = selectedIndex;
     }
 
-    public void SaveSettings(int windowModeIndex, Dictionary<KeyBindingManager.GameAction, Key> bindings)
+    public void ApplyMusicVolume(int volumePercent)
+    {
+        var volume = volumePercent / 100.0;
+        MusicManager.Instance.Volume = volume;
+        LastAppliedMusicVolume = volumePercent;
+    }
+
+    public void SaveSettings(int windowModeIndex, int musicVolume, Dictionary<KeyBindingManager.GameAction, Key> bindings)
     {
         Settings.WindowModeIndex = windowModeIndex;
+        Settings.MusicVolume = musicVolume;
         Settings.KeyBindings = bindings;
         Settings.Save();
     }
@@ -44,11 +53,15 @@ public class OptionsControl
     public void ResetToDefaults()
     {
         Settings.ResetToDefaults();
+        ApplyMusicVolume(Settings.MusicVolume);
     }
 
-    public bool HasUnsavedChanges(int windowModeIndex, Dictionary<KeyBindingManager.GameAction, Key> currentBindings)
+    public bool HasUnsavedChanges(int windowModeIndex, int musicVolume, Dictionary<KeyBindingManager.GameAction, Key> currentBindings)
     {
         if (windowModeIndex != Settings.WindowModeIndex)
+            return true;
+
+        if (musicVolume != Settings.MusicVolume)
             return true;
 
         var savedBindings = Settings.KeyBindings;
