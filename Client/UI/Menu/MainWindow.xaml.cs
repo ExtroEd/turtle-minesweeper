@@ -53,8 +53,8 @@ public partial class MainWindow
 
     private void OnRendering(object? sender, EventArgs e)
     {
-        var now = DateTime.Now.TotalMilliseconds();
-        var deltaTime = (now - _lastUpdateTime) / 1000.0;
+        var now = DateTime.Now.Ticks / (double)TimeSpan.TicksPerSecond;
+        var deltaTime = now - _lastUpdateTime;
         _lastUpdateTime = now;
 
         _musicManager.Update(deltaTime);
