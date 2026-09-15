@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Client.Logic;
@@ -9,20 +9,33 @@ public partial class OptionsControl
 {
     private KeyBindingManager.GameAction? _awaitingAction;
     private readonly Logic.OptionsControl _control;
+    private bool _isInitializing;
 
     public OptionsControl()
     {
         InitializeComponent();
         _control = new Logic.OptionsControl();
+        _isInitializing = true;
         LoadSettingsToUI();
         RefreshButtons();
+        _isInitializing = false;
     }
 
     private void LoadSettingsToUI()
     {
+        _isInitializing = true;
+        
         WindowModeComboBox.SelectedIndex = _control.Settings.WindowModeIndex;
+        
+        if (MusicVolumeSlider != null)
+        {
+            MusicVolumeSlider.Value = _control.Settings.MusicVolume;
+            MusicVolumeLabel.Text = $"{_control.Settings.MusicVolume}%";
+        }
 
         KeyBindingManager.LoadBindings(_control.Settings.KeyBindings);
+        
+        _isInitializing = false;
     }
 
     private void RefreshButtons()
@@ -57,9 +70,19 @@ public partial class OptionsControl
         e.Handled = true;
     }
 
+    private void MusicVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_isInitializing) return;
+
+        var volume = (int)MusicVolumeSlider.Value;
+        MusicVolumeLabel.Text = $"{volume}%";
+        _control.ApplyMusicVolume(volume);
+    }
+
     private void ApplySettings_Click(object sender, RoutedEventArgs e)
     {
-        _control.SaveSettings(WindowModeComboBox.SelectedIndex, KeyBindingManager.GetAllBindings());
+        var musicVolume = (int)MusicVolumeSlider.Value;
+        _control.SaveSettings(WindowModeComboBox.SelectedIndex, musicVolume, KeyBindingManager.GetAllBindings());
 
         var mainWindow = Application.Current.MainWindow;
         if (mainWindow != null && _control.LastAppliedWindowMode != WindowModeComboBox.SelectedIndex)
@@ -85,7 +108,8 @@ public partial class OptionsControl
 
     private bool HasUnsavedChanges()
     {
-        return _control.HasUnsavedChanges(WindowModeComboBox.SelectedIndex, KeyBindingManager.GetAllBindings());
+        var musicVolume = (int)MusicVolumeSlider.Value;
+        return _control.HasUnsavedChanges(WindowModeComboBox.SelectedIndex, musicVolume, KeyBindingManager.GetAllBindings());
     }
 
     private void Back_Click(object sender, RoutedEventArgs e)
