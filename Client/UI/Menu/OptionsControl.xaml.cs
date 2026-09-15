@@ -30,7 +30,8 @@ public partial class OptionsControl
         if (MusicVolumeSlider != null)
         {
             MusicVolumeSlider.Value = _control.Settings.MusicVolume;
-            MusicVolumeLabel.Text = $"{_control.Settings.MusicVolume}%";
+            if (MusicVolumeLabel != null)
+                MusicVolumeLabel.Text = $"{_control.Settings.MusicVolume}%";
         }
 
         KeyBindingManager.LoadBindings(_control.Settings.KeyBindings);
@@ -72,7 +73,8 @@ public partial class OptionsControl
 
     private void MusicVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (_isInitializing) return;
+        if (_isInitializing || MusicVolumeSlider == null || MusicVolumeLabel == null) 
+            return;
 
         var volume = (int)MusicVolumeSlider.Value;
         MusicVolumeLabel.Text = $"{volume}%";
