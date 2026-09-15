@@ -2,12 +2,16 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Client.Logic;
 using Client.UI.Shared;
 
 namespace Client.UI.Menu;
 
 public partial class MainWindow
 {
+    private readonly MusicManager _musicManager = MusicManager.Instance;
+    private double _lastUpdateTime;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -33,8 +37,27 @@ public partial class MainWindow
         {
             VersionText.Text = "Version not found";
         }
+
+        // Загружаем настройки и применяем громкость музыки
+        var settings = GameSettings.Load();
+        _musicManager.Volume = settings.MusicVolume / 100.0;
+        
+        // Стартуем музыку
+        _musicManager.Start();
+        
+        // Добавляем обновление музыки в render loop
+        CompositionTarget.Rendering += OnRendering;
         
         SwitchContent(new MainMenuControl());
+    }
+
+    private void OnRendering(object? sender, EventArgs e)
+    {
+        var now = DateTime.Now.TotalMilliseconds();
+        var deltaTime = (now - _lastUpdateTime) / 1000.0;
+        _lastUpdateTime = now;
+
+        _musicManager.Update(deltaTime);
     }
 
     public void SwitchContent(UserControl screen)
@@ -48,5 +71,13 @@ public partial class MainWindow
         VersionText.Visibility = isGame ? Visibility.Collapsed : Visibility.Visible;
 
         Background = isGame ? Brushes.LightGray : Brushes.White;
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        _musicManager.Stop();
+        _musicManager.Dispose();
+        CompositionTarget.Rendering -= OnRendering;
     }
 }
