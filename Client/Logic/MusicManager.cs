@@ -17,13 +17,13 @@ public class MusicManager : IDisposable
 
     private double _targetVolume = 0.5;
     private double _currentVolume = 0;
-    private const double FadeDuration = 2.0; // 2 секунды
+    private const double FadeDuration = 2.0;
     private double _fadeElapsed;
     private bool _isFadingIn;
     private bool _isPlayingMusic;
 
     private DateTime _lastTrackEndTime = DateTime.MinValue;
-    private const double IntervalBetweenTracks = 60.0; // 1 минута перерыва
+    private const double IntervalBetweenTracks = 60.0;
 
     private MusicManager()
     {
@@ -37,7 +37,7 @@ public class MusicManager : IDisposable
         set
         {
             _targetVolume = Math.Clamp(value, 0, 1);
-            if (!_isPlayingMusic)
+            if (_isPlayingMusic)
                 _mediaPlayer.Volume = _targetVolume;
         }
     }
@@ -98,7 +98,6 @@ public class MusicManager : IDisposable
         if (_disposed || !_isPlayingMusic)
             return;
 
-        // Обновляем громкость с затуханием
         if (_isFadingIn)
         {
             _fadeElapsed += deltaTime;
@@ -115,11 +114,10 @@ public class MusicManager : IDisposable
         }
         else
         {
-            // Плавное изменение громкости при смене значения
             if (Math.Abs(_currentVolume - _targetVolume) > 0.01)
             {
                 var diff = _targetVolume - _currentVolume;
-                _currentVolume += diff * (float)(deltaTime / 0.2); // Переход за 0.2 сек
+                _currentVolume += diff * (float)(deltaTime / 0.2);
                 _currentVolume = Math.Clamp(_currentVolume, 0, 1);
             }
             else
@@ -130,7 +128,6 @@ public class MusicManager : IDisposable
 
         _mediaPlayer.Volume = _currentVolume;
 
-        // Проверяем время ожидания между треками
         if (_mediaPlayer.Source == null && _musicFiles.Count > 0)
         {
             var timeSinceEnd = (DateTime.Now - _lastTrackEndTime).TotalSeconds;
@@ -149,7 +146,6 @@ public class MusicManager : IDisposable
         _currentFile = _musicFiles[_currentMusicIndex];
         _currentMusicIndex++;
 
-        // Перемешиваем список, когда доходим до конца
         if (_currentMusicIndex >= _musicFiles.Count)
         {
             ShuffleMusicList();
@@ -174,7 +170,6 @@ public class MusicManager : IDisposable
     private void OnMediaEnded(object? sender, EventArgs e)
     {
         _lastTrackEndTime = DateTime.Now;
-        _mediaPlayer.Source = null;
     }
 
     public void Dispose()
@@ -185,6 +180,6 @@ public class MusicManager : IDisposable
         _disposed = true;
         _mediaPlayer.Stop();
         _mediaPlayer.Close();
-        _mediaPlayer.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
